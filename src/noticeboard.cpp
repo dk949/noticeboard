@@ -369,6 +369,38 @@ void NBsetExpireTime(NBNotice *NB_NONNULL notice, int time) {
 int NBgetExpireTime(NBNotice const *NB_NONNULL notice) {
     return notice->expire_time;
 }
+
+int NBSend(NBNotice *NB_NONNULL notice,  //
+    char const *NB_NONNULL header,
+    char const *NB_NULLABLE body) {
+    return as(notice)->send(header, body);
+}
+
+int NBSendPos(NBNotice *NB_NONNULL notice,  //
+    int x,
+    int y,
+    char const *NB_NONNULL header,
+    char const *NB_NULLABLE body) {
+
+    return as(notice)->sendPos({x, y}, header, body);
+}
+
+int NBSendSync(NBNotice *NB_NONNULL notice,  //
+    char const *NB_NONNULL header,
+    char const *NB_NULLABLE body,
+    char *NB_NULLABLE *NB_NULLABLE action_results) {
+    return as(notice)->sendSync(header, body);
+}
+
+int NBSendPosSync(NBNotice *NB_NONNULL notice,
+    int x,
+    int y,
+    char const *NB_NONNULL header,
+    char const *NB_NULLABLE body,
+    char *NB_NULLABLE *NB_NULLABLE action_results) {
+
+    return as(notice)->sendPosSync({x, y}, header, body);
+}
 }
 
 NBNotice::NBNotice()

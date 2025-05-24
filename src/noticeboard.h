@@ -162,6 +162,28 @@ char const *NB_NONNULL NBgetIcon(NBNotice const *NB_NONNULL notice);
 void NBsetExpireTime(NBNotice *NB_NONNULL, int);
 int NBgetExpireTime(NBNotice const *NB_NONNULL notice);
 
+int NBSend(NBNotice *NB_NONNULL,  //
+    char const *NB_NONNULL header,
+    char const *NB_NULLABLE body);
+
+int NBSendPos(NBNotice *NB_NONNULL,  //
+    int x,
+    int y,
+    char const *NB_NONNULL header,
+    char const *NB_NULLABLE body);
+
+int NBSendSync(NBNotice *NB_NONNULL,  //
+    char const *NB_NONNULL header,
+    char const *NB_NULLABLE body,
+    char *NB_NULLABLE *NB_NULLABLE action_results);
+
+int NBSendPosSync(NBNotice *NB_NONNULL,
+    int x,
+    int y,
+    char const *NB_NONNULL header,
+    char const *NB_NULLABLE body,
+    char *NB_NULLABLE *NB_NULLABLE action_results);
+
 #ifdef __cplusplus
 }
 #endif
