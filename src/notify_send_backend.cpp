@@ -205,11 +205,7 @@ std::vector<std::string> NotifySendBackend::constructArgs(  //
 
     for (auto const &action : noticeActions(notice)) {
         out.emplace_back("-A");
-        if (action.name)
-            out.push_back(*action.name + '=');
-        else
-            out.emplace_back();
-        out.back().append(action.text);
+        out.push_back(std::format("{}={}", action.name, action.text));
     }
 
 

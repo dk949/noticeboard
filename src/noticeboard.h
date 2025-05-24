@@ -125,7 +125,7 @@ void NBdeleteNotice(NBNotice *NB_NULLABLE);
 
 char const *NB_NULLABLE NBerror(NBNotice const *NB_NONNULL notice);
 
-void NBpushAction(NBNotice *NB_NONNULL, char const *NB_NULLABLE name, char const *NB_NONNULL text);
+void NBpushAction(NBNotice *NB_NONNULL, char const *NB_NONNULL name, char const *NB_NONNULL text);
 void NBpopAction(NBNotice *NB_NONNULL);
 void NBclearActions(NBNotice *NB_NONNULL);
 char const *NB_NULLABLE NBgetActionNameAt(NBNotice const *NB_NONNULL notice, unsigned index);

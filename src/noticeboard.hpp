@@ -3,7 +3,6 @@
 
 #include <cstddef>
 #include <memory>
-#include <optional>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -79,7 +78,7 @@ enum struct Backend {
 using Category = std::variant<StandardCategory, std::string>;
 
 struct Action {
-    std::optional<std::string> name = {};
+    std::string name;
     std::string text;
 };
 

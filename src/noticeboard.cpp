@@ -184,9 +184,13 @@ char const *NB_NULLABLE NBerror(NBNotice const *NB_NONNULL notice) {
     return notice->m_error.c_str();
 }
 
-void NBpushAction(NBNotice *NB_NONNULL notice, char const *NB_NULLABLE name, char const *NB_NONNULL text) {
+void NBpushAction(NBNotice *NB_NONNULL notice, char const *NB_NONNULL name, char const *NB_NONNULL text) {
+    if (!name[0] || !text[0]) {
+        internalSetError(notice, "Both 'name' and 'text' have to not be empty");
+        return;
+    }
     as(notice)->pushAction(nb::Action {
-        .name = name ? std::optional {std::string {name}} : std::nullopt,
+        .name = name,
         .text = text,
     });
 }
@@ -202,8 +206,7 @@ void NBclearActions(NBNotice *NB_NONNULL notice) {
 char const *NB_NULLABLE NBgetActionNameAt(NBNotice const *NB_NONNULL notice, unsigned index) {
     if (index >= as(notice)->actionCount()) return nullptr;
     auto const &name = as(notice)->actionAt(as(index)).name;
-    if (!name) return nullptr;
-    return name->c_str();
+    return name.c_str();
 }
 
 char const *NB_NULLABLE NBgetActionTextAt(NBNotice const *NB_NONNULL notice, unsigned index) {
@@ -480,6 +483,9 @@ int Notice::sendPosSync(Pos pos, std::string_view header, std::string_view body,
 }
 
 void Notice::pushAction(Action action) {
+    if (action.name.empty() || action.text.empty())
+        throw nb::NoticeError("Both 'name' and 'text' in Action have to not be empty");
+
     m_actions.push_back(std::move(action));
 }
 
