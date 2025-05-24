@@ -1,0 +1,270 @@
+#include "notify_send_backend.hpp"
+
+#include <sys/wait.h>
+#include <unistd.h>
+
+#include <algorithm>
+#include <cctype>
+#include <charconv>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <filesystem>
+#include <format>
+#include <optional>
+#include <print>
+#include <ranges>
+#include <stdexcept>
+#include <string>
+#include <utility>
+
+namespace fs = std::filesystem;
+namespace rng = std::ranges;
+static constexpr auto EXEC_ERROR = 76;
+
+namespace nb {
+class InternalNotifySendError : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
+}
+
+class FD {
+    bool m_closed = false;
+    int m_fd;
+public:
+    explicit FD(int fd)
+            : m_fd(fd) { }
+
+    void close() {
+        if (m_closed) return;
+        m_closed = true;
+        ::close(m_fd);
+    }
+
+    ~FD() {
+        close();
+    }
+
+    FD(FD const &) = delete;
+    FD &operator=(FD const &) = delete;
+
+    FD(FD &&other) {
+        *this = std::move(other);
+    }
+
+    FD &operator=(FD &&other) {
+        if (&other == this) return *this;
+        close();
+        std::swap(m_fd, other.m_fd);
+        std::swap(m_closed, other.m_closed);
+        return *this;
+    }
+
+    int get() const {
+        return m_fd;
+    }
+
+    int release() {
+        m_closed = true;
+        return m_fd;
+    }
+};
+
+static std::string_view trimWS(std::string_view str) {
+    return {
+        std::find_if_not(  //
+            str.begin(),
+            str.end(),
+            [](char ch) { return std::isspace(ch); }),
+        std::find_if_not(  //
+            str.rbegin(),
+            str.rend(),
+            [](char ch) {
+        return std::isspace(ch);
+    }).base(),
+    };
+}
+
+static std::optional<int> tryToInt(std::string_view sv) {
+    int out;
+    auto const [ptr, ec] = std::from_chars(sv.data(), sv.data() + sv.size(), out);
+    if (ec == std::errc {} && ptr == sv.data() + sv.size())
+        return out;
+    else
+        return std::nullopt;
+}
+
+static bool notifySendExists() {
+    auto path = std::getenv("PATH");
+    if (!path) return false;
+    std::error_code ec;
+    return rng::contains(  //
+        rng::split_view(std::string_view {path}, ':'),
+        true,
+        [&](auto const &component) {
+        return rng::contains(  //
+            fs::directory_iterator(std::string_view {component}, ec),
+            true,
+            [](auto const &entry) { return entry.is_regular_file() && entry.path().filename() == "notify-send"; });
+    });
+}
+
+[[noreturn]]
+static void spawnNotifySend(std::vector<std::string> &args, FD fd) {
+    dup2(fd.get(), STDERR_FILENO);
+    dup2(fd.get(), STDOUT_FILENO);
+    fd.close();
+    std::vector<char *> argv;
+    argv.reserve(args.size() + 1);
+    static char pname[] = "notify-send";
+    argv.push_back(pname);
+    for (auto &arg : args)
+        argv.push_back(arg.data());
+    argv.push_back(nullptr);
+    execvp(argv[0], argv.data());
+    std::println("Failed to execvp(notify-send): {}", std::strerror(errno));
+    std::exit(EXEC_ERROR);  // Exits the forked process, not the main process
+}
+
+static std::string readFDToString(FD fd) {
+    std::string out;
+    auto fp = std::unique_ptr<FILE, decltype([](FILE *p) { std::fclose(p); })>(fdopen(fd.release(), "r"));
+    if (!fp)
+        throw nb::InternalNotifySendError(
+            std::format("Failed to convert file descriptor to a FILE*: {}", std::strerror(errno)));
+    int ch;
+    errno = 0;
+    while ((ch = fgetc(fp.get())) != EOF)
+        out.push_back(char(ch));
+    if (errno)
+        throw nb::InternalNotifySendError(
+            std::format("Failed to read all bytes from notify-send: {}", std::strerror(errno)));
+    return out;
+}
+
+static void handleExitTsatus(int status, std::string const &text) {
+    if (WIFEXITED(status)) {
+        if (auto const real_status = WEXITSTATUS(status)) {
+            if (real_status == EXEC_ERROR) throw nb::InternalNotifySendError(text);
+            throw nb::NoticeError(std::format("notify-send exited with non-zero status {}:\n{}", real_status, text));
+        }
+    } else if (WIFSIGNALED(status))
+        throw nb::NoticeError(std::format("notify-send was closed by signal {}:\n{}", WTERMSIG(status), text));
+    else if (WIFSTOPPED(status))
+        throw nb::NoticeError(std::format("notify-send was stopped by signal {}:\n{}", WSTOPSIG(status), text));
+}
+
+static int runNotifySend(std::vector<std::string> &args) {
+    int fds[2];
+    pipe(fds);
+    FD read {fds[0]};
+    FD write {fds[1]};
+    std::string out;
+    switch (auto const pid = fork()) {
+        case -1: throw nb::NoticeError(std::format("Failed to fork: {}", std::strerror(errno)));
+        case 0: read.close(); spawnNotifySend(args, std::move(write));
+        default:
+            write.close();
+            out = readFDToString(std::move(read));
+            int status;
+            waitpid(pid, &status, 0);
+            handleExitTsatus(status, out);
+            break;
+    }
+    if (auto id = tryToInt(trimWS(out))) return *id;
+
+    throw nb::InternalNotifySendError(std::format("notify-send produced unexpected output: {}", out));
+}
+
+namespace nb {
+
+NotifySendBackend::NotifySendBackend() {
+    if (!notifySendExists()) throw NoticeError("Cannot use the NotifySend Backend: notify-send executable not found");
+}
+
+std::vector<std::string> NotifySendBackend::constructArgs(  //
+    Notice const &notice,
+    std::string_view header,
+    std::string_view body,
+    BackendOptions opts) const {
+    std::vector<std::string> out;
+
+    auto const addHint = [&](Hint const &hint) {
+        out.emplace_back("-h");
+        out.push_back(std::format("{}:{}:{}", hint.typeStr(), hint.name(), hint.valueStr()));
+    };
+
+    out.emplace_back("-a");
+    out.push_back(notice.app_name);
+
+    out.emplace_back("-u");
+    out.emplace_back(notice.urgencyStr());
+    addHint(Hint::custom("urgency", std::uint8_t(std::to_underlying(notice.urgency) + 1)));
+
+    out.emplace_back("-p");
+
+    for (auto const &action : noticeActions(notice)) {
+        out.emplace_back("-A");
+        if (action.name)
+            out.push_back(*action.name + '=');
+        else
+            out.emplace_back();
+        out.back().append(action.text);
+    }
+
+
+    if (notice.expire_time != DEFAULT_EXPIRE) {
+        out.emplace_back("-t");
+        out.push_back(std::format("{}", notice.expire_time));
+    }
+
+    if (!notice.icon.empty()) {
+        out.emplace_back("-i");
+        out.push_back(notice.icon);
+    }
+
+    auto category = notice.getCategory();
+    if (!category.empty()) {
+        out.emplace_back("-c");
+        out.emplace_back(category);
+        addHint(Hint::custom("category", std::string {category}));
+    }
+    for (auto const &hint : noticeHints(notice))
+        addHint(hint);
+
+    if (notice.transient) {
+        out.emplace_back("-e");
+        addHint(Hint::custom("transient", true));
+    }
+
+    if (opts.replace != NO_REPLACE) {
+        out.emplace_back("-r");
+        out.push_back(std::format("{}", opts.replace));
+    }
+    if (opts.blocking) out.emplace_back("-w");
+    if (opts.pos != Pos {-1, -1}) {
+        addHint(Hint::custom("x", opts.pos.x));
+        addHint(Hint::custom("y", opts.pos.y));
+    }
+
+    out.emplace_back(header);
+    out.emplace_back(body);
+
+    return out;
+}
+
+int NotifySendBackend::send(  //
+    Notice const &notice,
+    std::string_view header,
+    std::string_view body,
+    BackendOptions opts) const {
+    if (!noticeActions(notice).empty() && !opts.blocking)
+        throw NoticeError("When used with the NotifySend Backend, supplying an Action implies synchronous mode");
+    auto args = constructArgs(notice, header, body, opts);
+    return runNotifySend(args);
+}
+
+NotifySendBackend *NotifySendBackend::clone() const {
+    return new NotifySendBackend(*this);
+}
+}  // namespace nb
