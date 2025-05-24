@@ -6,7 +6,7 @@
 namespace nb {
 struct BackendOptions {
     Pos pos;
-    int replace;
+    NoticeId replace;
     bool blocking;
 };
 
@@ -14,7 +14,7 @@ class BackendBase {
 public:
     BackendBase() = default;
     virtual ~BackendBase() = default;
-    virtual int send(  //
+    virtual SendResponse send(  //
         Notice const &notice,
         std::string_view header,
         std::string_view body,

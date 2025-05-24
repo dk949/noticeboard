@@ -175,14 +175,14 @@ int NBSendPos(NBNotice *NB_NONNULL,  //
 int NBSendSync(NBNotice *NB_NONNULL,  //
     char const *NB_NONNULL header,
     char const *NB_NULLABLE body,
-    char *NB_NULLABLE *NB_NULLABLE action_results);
+    char *NB_NULLABLE *NB_NULLABLE action_result);
 
 int NBSendPosSync(NBNotice *NB_NONNULL,
     int x,
     int y,
     char const *NB_NONNULL header,
     char const *NB_NULLABLE body,
-    char *NB_NULLABLE *NB_NULLABLE action_results);
+    char *NB_NULLABLE *NB_NULLABLE action_result);
 
 #ifdef __cplusplus
 }

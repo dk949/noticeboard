@@ -7,7 +7,7 @@ add_library(noticeboard
     ${CMAKE_CURRENT_SOURCE_DIR}/notify_send_backend.cpp
 )
 
-target_compile_features(noticeboard PUBLIC c_std_11)
+target_compile_features(noticeboard PUBLIC c_std_23)
 target_compile_features(noticeboard PUBLIC cxx_std_23)
 target_have_nullable(noticeboard PUBLIC NB_HAVE_NULLABLE)
 target_have_nonnull(noticeboard PUBLIC NB_HAVE_NONNULL)

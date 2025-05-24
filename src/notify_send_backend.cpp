@@ -235,7 +235,7 @@ std::vector<std::string> NotifySendBackend::constructArgs(  //
 
     if (opts.replace != NO_REPLACE) {
         out.emplace_back("-r");
-        out.push_back(std::format("{}", opts.replace));
+        out.push_back(std::format("{}", std::to_underlying(opts.replace)));
     }
     if (opts.blocking) out.emplace_back("-w");
     if (opts.pos != Pos {-1, -1}) {
@@ -249,7 +249,7 @@ std::vector<std::string> NotifySendBackend::constructArgs(  //
     return out;
 }
 
-int NotifySendBackend::send(  //
+SendResponse NotifySendBackend::send(  //
     Notice const &notice,
     std::string_view header,
     std::string_view body,
@@ -257,7 +257,7 @@ int NotifySendBackend::send(  //
     if (!noticeActions(notice).empty() && !opts.blocking)
         throw NoticeError("When used with the NotifySend Backend, supplying an Action implies synchronous mode");
     auto args = constructArgs(notice, header, body, opts);
-    return runNotifySend(args);
+    return {.id = NoticeId(runNotifySend(args)), .action_taken = {}};
 }
 
 NotifySendBackend *NotifySendBackend::clone() const {

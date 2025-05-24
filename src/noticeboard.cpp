@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <bit>
 #include <cstdarg>
+#include <cstring>
 #include <format>
 #include <utility>
 #include <variant>
@@ -376,7 +377,7 @@ int NBgetExpireTime(NBNotice const *NB_NONNULL notice) {
 int NBSend(NBNotice *NB_NONNULL notice,  //
     char const *NB_NONNULL header,
     char const *NB_NULLABLE body) {
-    return as(notice)->send(header, body);
+    return std::to_underlying(as(notice)->send(header, body));
 }
 
 int NBSendPos(NBNotice *NB_NONNULL notice,  //
@@ -385,14 +386,19 @@ int NBSendPos(NBNotice *NB_NONNULL notice,  //
     char const *NB_NONNULL header,
     char const *NB_NULLABLE body) {
 
-    return as(notice)->sendPos({x, y}, header, body);
+    return std::to_underlying(as(notice)->sendPos({x, y}, header, body));
 }
 
 int NBSendSync(NBNotice *NB_NONNULL notice,  //
     char const *NB_NONNULL header,
     char const *NB_NULLABLE body,
-    char *NB_NULLABLE *NB_NULLABLE action_results) {
-    return as(notice)->sendSync(header, body);
+    char *NB_NULLABLE *NB_NULLABLE action_result) {
+    auto res = as(notice)->sendSync(header, body);
+    if (res.action_taken)
+        *action_result = strdup(res.action_taken->c_str());
+    else
+        *action_result = nullptr;
+    return std::to_underlying(res.id);
 }
 
 int NBSendPosSync(NBNotice *NB_NONNULL notice,
@@ -400,9 +406,14 @@ int NBSendPosSync(NBNotice *NB_NONNULL notice,
     int y,
     char const *NB_NONNULL header,
     char const *NB_NULLABLE body,
-    char *NB_NULLABLE *NB_NULLABLE action_results) {
+    char *NB_NULLABLE *NB_NULLABLE action_result) {
 
-    return as(notice)->sendPosSync({x, y}, header, body);
+    auto res = as(notice)->sendPosSync({x, y}, header, body);
+    if (res.action_taken)
+        *action_result = strdup(res.action_taken->c_str());
+    else
+        *action_result = nullptr;
+    return std::to_underlying(res.id);
 }
 }
 
@@ -438,18 +449,20 @@ Notice ::Notice(std::string name, std::unique_ptr<BackendBase> backend) {
     NBNotice::m_backend = std::move(backend);
 }
 
-int Notice::send(std::string_view header, std::string_view body, int replace) const {
-    return m_backend->send(*this,
-        header,
-        body,
-        {
-            .pos = {-1, -1},
-            .replace = replace,
-            .blocking = false,
-    });
+NoticeId Notice::send(std::string_view header, std::string_view body, NoticeId replace) const {
+    return m_backend
+        ->send(*this,
+            header,
+            body,
+            {
+                .pos = {-1, -1},
+                .replace = replace,
+                .blocking = false,
+    })
+        .id;
 }
 
-int Notice::sendSync(std::string_view header, std::string_view body, int replace) const {
+SendResponse Notice::sendSync(std::string_view header, std::string_view body, NoticeId replace) const {
     return m_backend->send(*this,
         header,
         body,
@@ -460,18 +473,20 @@ int Notice::sendSync(std::string_view header, std::string_view body, int replace
     });
 }
 
-int Notice::sendPos(Pos pos, std::string_view header, std::string_view body, int replace) const {
-    return m_backend->send(*this,
-        header,
-        body,
-        {
-            .pos = pos,
-            .replace = replace,
-            .blocking = false,
-        });
+NoticeId Notice::sendPos(Pos pos, std::string_view header, std::string_view body, NoticeId replace) const {
+    return m_backend
+        ->send(*this,
+            header,
+            body,
+            {
+                .pos = pos,
+                .replace = replace,
+                .blocking = false,
+            })
+        .id;
 }
 
-int Notice::sendPosSync(Pos pos, std::string_view header, std::string_view body, int replace) const {
+SendResponse Notice::sendPosSync(Pos pos, std::string_view header, std::string_view body, NoticeId replace) const {
     return m_backend->send(*this,
         header,
         body,

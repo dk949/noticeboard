@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -15,9 +16,6 @@
 #include "noticeboard.h"
 
 namespace nb {
-inline constexpr auto const NO_REPLACE = -1;
-inline constexpr auto const DEFAULT_EXPIRE = 0;
-
 enum struct StandardCategory {
     None = NBStandardCategory::NB_C_NONE,
     Call = NBStandardCategory::NB_C_CALL,
@@ -120,6 +118,17 @@ struct Pos {
     int y;
     bool operator==(Pos const &) const = default;
 };
+
+enum struct NoticeId { };
+
+struct SendResponse {
+    NoticeId id;
+    std::optional<std::string> action_taken;
+};
+
+inline constexpr auto const NO_REPLACE = NoticeId(-1);
+inline constexpr auto const DEFAULT_EXPIRE = 0;
+
 class BackendBase;
 }  // namespace nb
 
@@ -160,10 +169,14 @@ struct Notice : public NBNotice {
     Notice(std::string app_name, std::unique_ptr<BackendBase> backend);
 
 
-    int send(std::string_view header, std::string_view body = {}, int replace = NO_REPLACE) const;
-    int sendSync(std::string_view header, std::string_view body = {}, int replace = NO_REPLACE) const;
-    int sendPos(Pos pos, std::string_view header, std::string_view body = {}, int replace = NO_REPLACE) const;
-    int sendPosSync(Pos pos, std::string_view header, std::string_view body = {}, int replace = NO_REPLACE) const;
+    NoticeId send(std::string_view header, std::string_view body = {}, NoticeId replace = NO_REPLACE) const;
+    SendResponse sendSync(std::string_view header, std::string_view body = {}, NoticeId replace = NO_REPLACE) const;
+    NoticeId sendPos(Pos pos, std::string_view header, std::string_view body = {}, NoticeId replace = NO_REPLACE) const;
+    SendResponse sendPosSync(  //
+        Pos pos,
+        std::string_view header,
+        std::string_view body = {},
+        NoticeId replace = NO_REPLACE) const;
 
     void pushAction(Action);
     void clearActions();

@@ -7,7 +7,7 @@ namespace nb {
 class NotifySendBackend : public BackendBase {
 public:
     NotifySendBackend();
-    int send(  //
+    SendResponse send(  //
         Notice const &notice,
         std::string_view header,
         std::string_view body,
