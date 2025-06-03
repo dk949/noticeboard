@@ -1,5 +1,5 @@
-#ifndef BACKEND_HPP
-#define BACKEND_HPP
+#ifndef NOTICEBOARD_BACKEND_HPP
+#define NOTICEBOARD_BACKEND_HPP
 
 #include "noticeboard.hpp"
 
@@ -40,4 +40,4 @@ protected:
 
 }  // namespace nb
 
-#endif  // BACKEND_HPP
+#endif  // NOTICEBOARD_BACKEND_HPP

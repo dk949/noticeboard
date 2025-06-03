@@ -1,5 +1,5 @@
-#ifndef NOTIFY_SEND_BACKEND_HPP
-#define NOTIFY_SEND_BACKEND_HPP
+#ifndef NOTICEBOARD_NOTIFY_SEND_BACKEND_HPP
+#define NOTICEBOARD_NOTIFY_SEND_BACKEND_HPP
 #include "backend.hpp"
 
 namespace nb {
@@ -26,4 +26,4 @@ private:
 
 }  // namespace nb
 
-#endif  // NOTIFY_SEND_BACKEND_HPP
+#endif  // NOTICEBOARD_NOTIFY_SEND_BACKEND_HPP
