@@ -123,7 +123,7 @@ enum struct NoticeId { };
 
 struct SendResponse {
     NoticeId id;
-    std::optional<std::string> action_taken;
+    std::optional<std::string_view> action_taken;
 };
 
 inline constexpr auto const NO_REPLACE = NoticeId(-1);

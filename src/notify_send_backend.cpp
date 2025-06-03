@@ -11,7 +11,6 @@
 #include <cstring>
 #include <filesystem>
 #include <format>
-#include <optional>
 #include <print>
 #include <ranges>
 #include <stdexcept>
@@ -20,6 +19,7 @@
 
 namespace fs = std::filesystem;
 namespace rng = std::ranges;
+namespace vws = std::views;
 static constexpr auto EXEC_ERROR = 76;
 
 namespace nb {
@@ -30,7 +30,7 @@ class InternalNotifySendError : public std::runtime_error {
 
 class FD {
     bool m_closed = false;
-    int m_fd;
+    int m_fd = -1;
 public:
     explicit FD(int fd)
             : m_fd(fd) { }
@@ -85,15 +85,6 @@ static std::string_view trimWS(std::string_view str) {
     };
 }
 
-static std::optional<int> tryToInt(std::string_view sv) {
-    int out;
-    auto const [ptr, ec] = std::from_chars(sv.data(), sv.data() + sv.size(), out);
-    if (ec == std::errc {} && ptr == sv.data() + sv.size())
-        return out;
-    else
-        return std::nullopt;
-}
-
 static bool notifySendExists() {
     auto path = std::getenv("PATH");
     if (!path) return false;
@@ -128,18 +119,18 @@ static void spawnNotifySend(std::vector<std::string> &args, FD fd) {
 
 static std::string readFDToString(FD fd) {
     std::string out;
-    auto fp = std::unique_ptr<FILE, decltype([](FILE *p) { std::fclose(p); })>(fdopen(fd.release(), "r"));
-    if (!fp)
-        throw nb::InternalNotifySendError(
-            std::format("Failed to convert file descriptor to a FILE*: {}", std::strerror(errno)));
-    int ch;
-    errno = 0;
-    while ((ch = fgetc(fp.get())) != EOF)
-        out.push_back(char(ch));
-    if (errno)
-        throw nb::InternalNotifySendError(
-            std::format("Failed to read all bytes from notify-send: {}", std::strerror(errno)));
-    return out;
+    char ch;
+    std::println("reading {}", fd.get());
+    std::fflush(stdout);
+    while (true) {
+        switch (read(fd.get(), &ch, 1)) {
+            case 1: out.push_back(ch); break;
+            case 0: return out;
+            default:
+                throw nb::InternalNotifySendError(
+                    std::format("Failed to read all bytes from notify-send: {}", std::strerror(errno)));
+        }
+    }
 }
 
 static void handleExitTsatus(int status, std::string const &text) {
@@ -154,7 +145,26 @@ static void handleExitTsatus(int status, std::string const &text) {
         throw nb::NoticeError(std::format("notify-send was stopped by signal {}:\n{}", WSTOPSIG(status), text));
 }
 
-static int runNotifySend(std::vector<std::string> &args) {
+static nb::SendResponse parseResponse(std::string_view sv, std::vector<nb::Action> const &actions) {
+    int id;
+    sv = trimWS(sv);
+    auto [ptr, ec] = std::from_chars(sv.begin(), sv.end(), id);
+
+    if (ec != std::errc {})
+        throw nb::InternalNotifySendError(std::format("notify-send produced unexpected output: {}", sv));
+    if (ptr == sv.end()) return {.id = nb::NoticeId(id), .action_taken = {}};
+    if (actions.empty())
+        throw nb::InternalNotifySendError(std::format("notify-send produced unexpected output: {}", sv));
+    auto action = trimWS(ptr);
+    auto taken = rng::find(actions, action, [](auto const &a) { return std::string_view {a.name}; });
+    if (taken == actions.end())
+        throw nb::InternalNotifySendError(std::format("Taken action '{}' is not one of the expected actions {}",
+            action,
+            actions | vws::transform([](nb::Action const &a) { return a.name + '=' + a.text; })));
+    return {.id = nb::NoticeId(id), .action_taken = taken->name};
+}
+
+static std::string runNotifySend(std::vector<std::string> &args) {
     int fds[2];
     pipe(fds);
     FD read {fds[0]};
@@ -171,9 +181,7 @@ static int runNotifySend(std::vector<std::string> &args) {
             handleExitTsatus(status, out);
             break;
     }
-    if (auto id = tryToInt(trimWS(out))) return *id;
-
-    throw nb::InternalNotifySendError(std::format("notify-send produced unexpected output: {}", out));
+    return out;
 }
 
 namespace nb {
@@ -257,7 +265,8 @@ SendResponse NotifySendBackend::send(  //
     if (!noticeActions(notice).empty() && !opts.blocking)
         throw NoticeError("When used with the NotifySend Backend, supplying an Action implies synchronous mode");
     auto args = constructArgs(notice, header, body, opts);
-    return {.id = NoticeId(runNotifySend(args)), .action_taken = {}};
+    auto res = runNotifySend(args);
+    return parseResponse(res, noticeActions(notice));
 }
 
 NotifySendBackend *NotifySendBackend::clone() const {

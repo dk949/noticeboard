@@ -131,7 +131,7 @@ static std::unique_ptr<nb::BackendBase> backendFactory(nb::Backend backend) {
     }
 }
 
-std::string_view hintNameToString(nb::HintName const &hint_name) {
+static std::string_view hintNameToString(nb::HintName const &hint_name) {
     return std::visit([]<typename T>(T const &h) {
         using D = std::remove_cvref_t<T>;
         if constexpr (std::is_same_v<nb::StandardHint, D>) {
@@ -392,10 +392,10 @@ int NBSendPos(NBNotice *NB_NONNULL notice,  //
 int NBSendSync(NBNotice *NB_NONNULL notice,  //
     char const *NB_NONNULL header,
     char const *NB_NULLABLE body,
-    char *NB_NULLABLE *NB_NULLABLE action_result) {
+    char const *NB_NULLABLE *NB_NULLABLE action_result) {
     auto res = as(notice)->sendSync(header, body);
     if (res.action_taken)
-        *action_result = strdup(res.action_taken->c_str());
+        *action_result = res.action_taken->data();
     else
         *action_result = nullptr;
     return std::to_underlying(res.id);
@@ -406,11 +406,11 @@ int NBSendPosSync(NBNotice *NB_NONNULL notice,
     int y,
     char const *NB_NONNULL header,
     char const *NB_NULLABLE body,
-    char *NB_NULLABLE *NB_NULLABLE action_result) {
+    char const *NB_NULLABLE *NB_NULLABLE action_result) {
 
     auto res = as(notice)->sendPosSync({x, y}, header, body);
     if (res.action_taken)
-        *action_result = strdup(res.action_taken->c_str());
+        *action_result = res.action_taken->data();
     else
         *action_result = nullptr;
     return std::to_underlying(res.id);
