@@ -120,7 +120,6 @@ static void spawnNotifySend(std::vector<std::string> &args, FD fd) {
 static std::string readFDToString(FD fd) {
     std::string out;
     char ch;
-    std::println("reading {}", fd.get());
     std::fflush(stdout);
     while (true) {
         switch (read(fd.get(), &ch, 1)) {
