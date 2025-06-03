@@ -5,6 +5,7 @@ add_library(noticeboard
     ${CMAKE_CURRENT_SOURCE_DIR}/noticeboard.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/backend.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/notify_send_backend.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/null_backend.cpp
 )
 
 set(headers
@@ -12,6 +13,7 @@ set(headers
     ${CMAKE_CURRENT_SOURCE_DIR}/noticeboard.h
     ${CMAKE_CURRENT_SOURCE_DIR}/noticeboard.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/notify_send_backend.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/null_backend.hpp
 )
 set_target_properties(noticeboard PROPERTIES PUBLIC_HEADER "${headers}")
 
