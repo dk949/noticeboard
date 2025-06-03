@@ -116,6 +116,7 @@ typedef enum NBStandardHint {
 typedef enum NBBackend {
     NB_B_Default,
     NB_B_NotifySend,
+    NB_B_Null,
     NB_B_DBUS,
 } NBBackend;
 
@@ -175,14 +176,14 @@ int NBSendPos(NBNotice *NB_NONNULL,  //
 int NBSendSync(NBNotice *NB_NONNULL,  //
     char const *NB_NONNULL header,
     char const *NB_NULLABLE body,
-    char const*NB_NULLABLE *NB_NULLABLE action_result);
+    char const *NB_NULLABLE *NB_NULLABLE action_result);
 
 int NBSendPosSync(NBNotice *NB_NONNULL,
     int x,
     int y,
     char const *NB_NONNULL header,
     char const *NB_NULLABLE body,
-    char const*NB_NULLABLE *NB_NULLABLE action_result);
+    char const *NB_NULLABLE *NB_NULLABLE action_result);
 
 #ifdef __cplusplus
 }

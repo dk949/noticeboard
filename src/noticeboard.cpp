@@ -2,6 +2,7 @@
 
 #include "backend.hpp"
 #include "notify_send_backend.hpp"
+#include "null_backend.hpp"
 
 #include <algorithm>
 #include <bit>
@@ -126,6 +127,7 @@ static std::unique_ptr<nb::BackendBase> backendFactory(nb::Backend backend) {
     switch (backend) {
         case Default:
         case NotifySend: return std::make_unique<nb::NotifySendBackend>();
+        case Null: return std::make_unique<nb::NullBackend>();
         case DBUS: throw nb::NoticeError("DBUS backend not yet supported");
         default: throw nb::NoticeError(std::format("Unsupported backend type {}", std::to_underlying(backend)));
     }

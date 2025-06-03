@@ -70,6 +70,7 @@ enum struct StandardHint {
 enum struct Backend {
     Default = NBBackend::NB_B_Default,
     NotifySend = NBBackend::NB_B_NotifySend,
+    Null = NBBackend::NB_B_Null,
     DBUS = NBBackend::NB_B_DBUS,
 };
 
