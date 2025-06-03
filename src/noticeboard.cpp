@@ -63,7 +63,7 @@ static nb::Backend as(NBBackend type) {
 }
 
 [[nodiscard]]
-static void const *hintValueToVoidP(nb::HintValue const &value) {
+static void const *hintValueToVoidP(nb::HintValue const &value) noexcept {
     return std::visit([]<typename T>(T const &v) {
         using D = std::remove_cvref_t<T>;
         if constexpr (std::is_same_v<bool, D> || std::is_same_v<std::uint8_t, D>)
@@ -74,7 +74,7 @@ static void const *hintValueToVoidP(nb::HintValue const &value) {
     }, value);
 }
 
-static auto findHintByName(std::vector<nb::Hint> const &hints, std::string_view hint_name) {
+static auto findHintByName(std::vector<nb::Hint> const &hints, std::string_view hint_name) noexcept {
     return std::find_if(hints.begin(), hints.end(), [&](auto const &hint) { return hint.name() == hint_name; });
 }
 
@@ -156,7 +156,7 @@ static std::string_view hintNameToString(nb::HintName const &hint_name) {
     }, hint_name);
 }
 
-void internalSetError(NBNotice *notice, std::string error) {
+void internalSetError(NBNotice const *notice, std::string error) noexcept {
     notice->m_error = std::move(error);
 }
 
@@ -444,7 +444,7 @@ namespace nb {
 Notice::Notice(std::string name, Backend backend)
         : Notice(std::move(name), backendFactory(backend)) { }
 
-Notice ::Notice(std::string name, std::unique_ptr<BackendBase> backend) {
+Notice::Notice(std::string name, std::unique_ptr<BackendBase> backend) {
     NBNotice::app_name = std::move(name);
     NBNotice::m_backend = std::move(backend);
 }
@@ -504,11 +504,11 @@ void Notice::pushAction(Action action) {
     m_actions.push_back(std::move(action));
 }
 
-void Notice::clearActions() {
+void Notice::clearActions() noexcept {
     m_actions.clear();
 }
 
-Action Notice::popAction() {
+Action Notice::popAction() noexcept {
     auto action = std::move(m_actions.back());
     m_actions.pop_back();
     return action;
@@ -520,7 +520,7 @@ Action const &Notice::actionAt(std::size_t idx) const {
 }
 
 [[nodiscard]]
-std::size_t Notice::actionCount() const {
+std::size_t Notice::actionCount() const noexcept {
     return m_actions.size();
 }
 
@@ -528,13 +528,13 @@ void Notice::pushHint(Hint hint) {
     m_hints.push_back(std::move(hint));
 }
 
-Hint Notice::popHint() {
+Hint Notice::popHint() noexcept {
     auto hint = std::move(m_hints.back());
     m_hints.pop_back();
     return hint;
 }
 
-void Notice::clearHints() {
+void Notice::clearHints() noexcept {
     m_hints.clear();
 }
 
@@ -555,24 +555,24 @@ HintValue const &Notice::hintValueAt(std::string_view name) const {
 }
 
 [[nodiscard]]
-std::size_t Notice::hintCount() const {
+std::size_t Notice::hintCount() const noexcept {
     return m_hints.size();
 }
 
 [[nodiscard]]
-bool Notice::hasHint(std::string_view name) const {
+bool Notice::hasHint(std::string_view name) const noexcept {
     if (auto found = findHintByName(m_hints, name); found != m_hints.end())
         return true;
     else
         return false;
 }
 
-void Notice::setCategory(StandardCategory cat) {
+void Notice::setCategory(StandardCategory cat) noexcept {
     m_category = cat;
 }
 
-void Notice::setCategory(std::string name) {
-    m_category = name;
+void Notice::setCategory(std::string name) noexcept {
+    m_category = std::move(name);
 }
 
 [[nodiscard]]
@@ -589,7 +589,7 @@ std::string_view Notice::urgencyStr() const {
     }
 }
 
-Hint::Hint(HintType type, HintName name, HintValue value)
+Hint::Hint(HintType type, HintName name, HintValue value) noexcept
         : m_name(std::move(name))
         , m_value(std::move(value))
         , m_type(type) { }
@@ -622,7 +622,7 @@ Hint Hint::suppressSound(bool value) {
     return {nb::HintType::Boolean, "suppress-sound", value};
 }
 
-Hint Hint::custom(std::string name, HintValue value) {
+Hint Hint::custom(std::string name, HintValue value) noexcept {
     auto type = std::visit([]<typename T>(T const &) {
         using D = std::remove_cvref_t<T>;
         if constexpr (std::is_same_v<bool, D>) return nb::HintType::Boolean;
@@ -635,7 +635,7 @@ Hint Hint::custom(std::string name, HintValue value) {
 }
 
 [[nodiscard]]
-HintType Hint::type() const {
+HintType Hint::type() const noexcept {
     return m_type;
 }
 
@@ -653,12 +653,12 @@ std::string_view Hint::typeStr() const {
 }
 
 [[nodiscard]]
-std::string_view Hint::name() const {
+std::string_view Hint::name() const noexcept {
     return hintNameToString(m_name);
 }
 
 [[nodiscard]]
-HintValue const &Hint::value() const {
+HintValue const &Hint::value() const noexcept {
     return m_value;
 }
 

@@ -97,20 +97,20 @@ public:
     static Hint soundFile(std::string);
     static Hint soundName(std::string);
     static Hint suppressSound(bool = true);
-    static Hint custom(std::string name, HintValue value);
+    static Hint custom(std::string name, HintValue value) noexcept;
 
     [[nodiscard]]
-    HintType type() const;
+    HintType type() const noexcept;
     [[nodiscard]]
     std::string_view typeStr() const;
     [[nodiscard]]
-    std::string_view name() const;
+    std::string_view name() const noexcept;
     [[nodiscard]]
-    HintValue const &value() const;
+    HintValue const &value() const noexcept;
     [[nodiscard]]
     std::string valueStr() const;
 private:
-    Hint(HintType, HintName, HintValue);
+    Hint(HintType, HintName, HintValue) noexcept;
 };
 
 struct Pos {
@@ -134,13 +134,13 @@ class BackendBase;
 
 struct NBNotice {
     friend char const *NBerror(NBNotice const *);
-    friend void internalSetError(NBNotice *, std::string);
+    friend void internalSetError(NBNotice const *, std::string) noexcept;
     friend class nb::BackendBase;
 protected:
     std::vector<nb::Action> m_actions;
     std::vector<nb::Hint> m_hints;
     nb::Category m_category;
-    std::string m_error;
+    mutable std::string m_error;
     std::unique_ptr<nb::BackendBase> m_backend;
 public:
     nb::Urgency urgency = nb::Urgency::Normal;
@@ -179,16 +179,16 @@ struct Notice : public NBNotice {
         NoticeId replace = NO_REPLACE) const;
 
     void pushAction(Action);
-    void clearActions();
-    Action popAction();
+    void clearActions() noexcept;
+    Action popAction() noexcept;
     [[nodiscard]]
     Action const &actionAt(std::size_t idx) const;
     [[nodiscard]]
-    std::size_t actionCount() const;
+    std::size_t actionCount() const noexcept;
 
     void pushHint(Hint);
-    Hint popHint();
-    void clearHints();
+    Hint popHint() noexcept;
+    void clearHints() noexcept;
     [[nodiscard]]
     Hint const &hintAt(std::size_t idx) const;
     [[nodiscard]]
@@ -196,15 +196,16 @@ struct Notice : public NBNotice {
     [[nodiscard]]
     HintValue const &hintValueAt(std::string_view name) const;
     [[nodiscard]]
-    std::size_t hintCount() const;
+    std::size_t hintCount() const noexcept;
     [[nodiscard]]
-    bool hasHint(std::string_view name) const;
+    bool hasHint(std::string_view name) const noexcept;
 
-    void setCategory(StandardCategory);
-    void setCategory(std::string);
+    void setCategory(StandardCategory) noexcept;
+    void setCategory(std::string) noexcept;
     [[nodiscard]]
     std::string_view getCategory() const;
 
+    [[nodiscard]]
     std::string_view urgencyStr() const;
 };
 }  // namespace nb
