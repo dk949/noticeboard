@@ -4,6 +4,10 @@
 #include "noticeboard.hpp"
 
 namespace nb {
+class BackendError : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
+
 struct BackendOptions {
     Pos pos;
     NoticeId replace;

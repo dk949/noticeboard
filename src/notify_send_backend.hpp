@@ -3,6 +3,9 @@
 #include "backend.hpp"
 
 namespace nb {
+class NotifySendError : public BackendError {
+    using BackendError::BackendError;
+};
 
 class NotifySendBackend : public BackendBase {
 public:

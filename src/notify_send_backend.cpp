@@ -23,8 +23,8 @@ namespace vws = std::views;
 static constexpr auto EXEC_ERROR = 76;
 
 namespace nb {
-class InternalNotifySendError : public std::runtime_error {
-    using std::runtime_error::runtime_error;
+class InternalNotifySendError : public BackendError {
+    using BackendError::BackendError;
 };
 }
 
@@ -137,12 +137,12 @@ static void handleExitTsatus(int status, std::string const &text) {
     if (WIFEXITED(status)) {
         if (auto const real_status = WEXITSTATUS(status)) {
             if (real_status == EXEC_ERROR) throw nb::InternalNotifySendError(text);
-            throw nb::NoticeError(std::format("notify-send exited with non-zero status {}:\n{}", real_status, text));
+            throw nb::NotifySendError(std::format("notify-send exited with non-zero status {}:\n{}", real_status, text));
         }
     } else if (WIFSIGNALED(status))
-        throw nb::NoticeError(std::format("notify-send was closed by signal {}:\n{}", WTERMSIG(status), text));
+        throw nb::NotifySendError(std::format("notify-send was closed by signal {}:\n{}", WTERMSIG(status), text));
     else if (WIFSTOPPED(status))
-        throw nb::NoticeError(std::format("notify-send was stopped by signal {}:\n{}", WSTOPSIG(status), text));
+        throw nb::NotifySendError(std::format("notify-send was stopped by signal {}:\n{}", WSTOPSIG(status), text));
 }
 
 static nb::SendResponse parseResponse(std::string_view sv, std::vector<nb::Action> const &actions) {
@@ -171,7 +171,7 @@ static std::string runNotifySend(std::vector<std::string> &args) {
     FD write {fds[1]};
     std::string out;
     switch (auto const pid = fork()) {
-        case -1: throw nb::NoticeError(std::format("Failed to fork: {}", std::strerror(errno)));
+        case -1: throw nb::NotifySendError(std::format("Failed to fork: {}", std::strerror(errno)));
         case 0: read.close(); spawnNotifySend(args, std::move(write));
         default:
             write.close();
@@ -187,7 +187,8 @@ static std::string runNotifySend(std::vector<std::string> &args) {
 namespace nb {
 
 NotifySendBackend::NotifySendBackend() {
-    if (!notifySendExists()) throw NoticeError("Cannot use the NotifySend Backend: notify-send executable not found");
+    if (!notifySendExists())
+        throw NotifySendError("Cannot use the NotifySend Backend: notify-send executable not found");
 }
 
 std::vector<std::string> NotifySendBackend::constructArgs(  //
@@ -263,7 +264,7 @@ SendResponse NotifySendBackend::send(  //
     std::string_view body,
     BackendOptions opts) const {
     if (!noticeActions(notice).empty() && !opts.blocking)
-        throw NoticeError("When used with the NotifySend Backend, supplying an Action implies synchronous mode");
+        throw NotifySendError("When used with the NotifySend Backend, supplying an Action implies synchronous mode");
     auto args = constructArgs(notice, header, body, opts);
     auto res = runNotifySend(args);
     return parseResponse(res, noticeActions(notice));
