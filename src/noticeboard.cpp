@@ -160,6 +160,27 @@ void internalSetError(NBNotice const *notice, std::string error) noexcept {
     notice->m_error = std::move(error);
 }
 
+template<typename Fn, typename _ret = std::remove_cvref_t<decltype((std::declval<Fn>())())>>
+auto tryCatch(NBNotice const *notice,
+    std::string_view ctx,
+    Fn &&fn,
+    std::conditional_t<std::is_same_v<_ret, void>, std::monostate, _ret> err_out = {}) {
+    try {
+        return fn();
+    } catch (nb::NoticeError const &e) {
+        internalSetError(notice, std::format("Failed to {}: {}", ctx, e.what()));
+    } catch (nb::BackendError const &e) {
+        internalSetError(notice, std::format("Backend error: Failed to {}: {}", ctx, e.what()));
+    } catch (nb::InternalNoticeError const &e) {
+        internalSetError(notice, std::format("Unexpected internal error: Failed to {}: {}", ctx, e.what()));
+    } catch (std::exception const &e) {
+        internalSetError(notice, std::format("Unexpected error: Failed to {}: {}", ctx, e.what()));
+    } catch (...) {
+        internalSetError(notice, std::format("An unknown error occurred: Failed to {}", ctx));
+    }
+    if constexpr (!std::is_same_v<_ret, void>) return err_out;
+}
+
 extern "C" {
 
 NBNotice *NB_NONNULL NBnewNotice(char const *NB_NONNULL app_name, NBBackend backend) {
@@ -173,7 +194,9 @@ NBNotice *NB_NONNULL NBnewNotice(char const *NB_NONNULL app_name, NBBackend back
 }
 
 NBNotice *NB_NONNULL NBcopyNotice(NBNotice const *NB_NONNULL notice) {
-    return new nb::Notice(*as(notice));
+    return tryCatch(notice, "clone NBNotice", [&] {  //
+        return new nb::Notice(*as(notice));
+    });
 }
 
 void NBdeleteNotice(NBNotice *NB_NULLABLE notice) {
@@ -190,9 +213,11 @@ void NBpushAction(NBNotice *NB_NONNULL notice, char const *NB_NONNULL name, char
         internalSetError(notice, "Both 'name' and 'text' have to not be empty");
         return;
     }
-    as(notice)->pushAction(nb::Action {
-        .name = name,
-        .text = text,
+    return tryCatch(notice, "push action", [&] {
+        as(notice)->pushAction(nb::Action {
+            .name = name,
+            .text = text,
+        });
     });
 }
 
@@ -218,16 +243,18 @@ char const *NB_NULLABLE NBgetActionTextAt(NBNotice const *NB_NONNULL notice, uns
 void NBpushHint(NBNotice *NB_NONNULL notice, int hint, ...) {
     va_list args;
     va_start(args, hint);
-    switch (hint) {
-        case NB_H_ACTION_ICONS: as(notice)->pushHint(nb::Hint::actionIcons(va_arg(args, int))); break;
-        case NB_H_DESKTOP_ENTRY: as(notice)->pushHint(nb::Hint::desktopEntry(va_arg(args, char const *))); break;
-        case NB_H_IMAGE_PATH: as(notice)->pushHint(nb::Hint::imagePath(va_arg(args, char const *))); break;
-        case NB_H_RESIDENT: as(notice)->pushHint(nb::Hint::resident(va_arg(args, int))); break;
-        case NB_H_SOUND_FILE: as(notice)->pushHint(nb::Hint::soundFile(va_arg(args, char const *))); break;
-        case NB_H_SOUND_NAME: as(notice)->pushHint(nb::Hint::soundName(va_arg(args, char const *))); break;
-        case NB_H_SUPPRESS_SOUND: as(notice)->pushHint(nb::Hint::suppressSound(va_arg(args, int))); break;
-        default: internalSetError(notice, std::format("Invalid standard hint: {}", hint));
-    }
+    return tryCatch(notice, "push hint", [&] {
+        switch (hint) {
+            case NB_H_ACTION_ICONS: as(notice)->pushHint(nb::Hint::actionIcons(va_arg(args, int))); break;
+            case NB_H_DESKTOP_ENTRY: as(notice)->pushHint(nb::Hint::desktopEntry(va_arg(args, char const *))); break;
+            case NB_H_IMAGE_PATH: as(notice)->pushHint(nb::Hint::imagePath(va_arg(args, char const *))); break;
+            case NB_H_RESIDENT: as(notice)->pushHint(nb::Hint::resident(va_arg(args, int))); break;
+            case NB_H_SOUND_FILE: as(notice)->pushHint(nb::Hint::soundFile(va_arg(args, char const *))); break;
+            case NB_H_SOUND_NAME: as(notice)->pushHint(nb::Hint::soundName(va_arg(args, char const *))); break;
+            case NB_H_SUPPRESS_SOUND: as(notice)->pushHint(nb::Hint::suppressSound(va_arg(args, int))); break;
+            default: internalSetError(notice, std::format("Invalid standard hint: {}", hint));
+        }
+    });
     va_end(args);
 }
 
@@ -235,14 +262,19 @@ void NBpushCustomHint(NBNotice *NB_NONNULL notice, NBHintType type, char const *
     va_list args;
     va_start(args, name);
 
-    switch (type) {
-        case NB_HT_BOOLEAN: as(notice)->pushHint(nb::Hint::custom(name, va_arg(args, int) != 0)); break;
-        case NB_HT_INT: as(notice)->pushHint(nb::Hint::custom(name, va_arg(args, int))); break;
-        case NB_HT_DOUBLE: as(notice)->pushHint(nb::Hint::custom(name, va_arg(args, double))); break;
-        case NB_HT_STRING: as(notice)->pushHint(nb::Hint::custom(name, std::string(va_arg(args, char const *)))); break;
-        case NB_HT_VOID: internalSetError(notice, "Invalid type for custom hint: NB_HT_VOID"); break;
-        default: internalSetError(notice, std::format("Invalid type for custom hint: {}", std::to_underlying(type)));
-    }
+    return tryCatch(notice, "push custom hint", [&] {
+        switch (type) {
+            case NB_HT_BOOLEAN: as(notice)->pushHint(nb::Hint::custom(name, va_arg(args, int) != 0)); break;
+            case NB_HT_INT: as(notice)->pushHint(nb::Hint::custom(name, va_arg(args, int))); break;
+            case NB_HT_DOUBLE: as(notice)->pushHint(nb::Hint::custom(name, va_arg(args, double))); break;
+            case NB_HT_STRING:
+                as(notice)->pushHint(nb::Hint::custom(name, std::string(va_arg(args, char const *))));
+                break;
+            case NB_HT_VOID: internalSetError(notice, "Invalid type for custom hint: NB_HT_VOID"); break;
+            default:
+                internalSetError(notice, std::format("Invalid type for custom hint: {}", std::to_underlying(type)));
+        }
+    });
 
     va_end(args);
 }
@@ -316,7 +348,9 @@ void NBsetCategory(NBNotice *NB_NONNULL notice, NBStandardCategory cat) {
 }
 
 void NBsetCustomCategory(NBNotice *NB_NONNULL notice, char const *NB_NONNULL name) {
-    as(notice)->setCategory(name);
+    return tryCatch(notice, "set custom category", [&] {  //
+        as(notice)->setCategory(name);
+    });
 }
 
 char const *NB_NULLABLE NBgetCategory(NBNotice const *NB_NONNULL notice) {
@@ -377,7 +411,9 @@ int NBgetExpireTime(NBNotice const *NB_NONNULL notice) {
 int NBSend(NBNotice *NB_NONNULL notice,  //
     char const *NB_NONNULL header,
     char const *NB_NULLABLE body) {
-    return std::to_underlying(as(notice)->send(header, body));
+    return tryCatch(notice, "send", [&] {  //
+        return std::to_underlying(as(notice)->send(header, body));
+    });
 }
 
 int NBSendPos(NBNotice *NB_NONNULL notice,  //
@@ -386,19 +422,23 @@ int NBSendPos(NBNotice *NB_NONNULL notice,  //
     char const *NB_NONNULL header,
     char const *NB_NULLABLE body) {
 
-    return std::to_underlying(as(notice)->sendPos({x, y}, header, body));
+    return tryCatch(notice, "send with position", [&] {  //
+        return std::to_underlying(as(notice)->sendPos({x, y}, header, body));
+    });
 }
 
 int NBSendSync(NBNotice *NB_NONNULL notice,  //
     char const *NB_NONNULL header,
     char const *NB_NULLABLE body,
     char const *NB_NULLABLE *NB_NULLABLE action_result) {
-    auto res = as(notice)->sendSync(header, body);
-    if (res.action_taken)
-        *action_result = res.action_taken->data();
-    else
-        *action_result = nullptr;
-    return std::to_underlying(res.id);
+    return tryCatch(notice, "send synchrously", [&] {
+        auto res = as(notice)->sendSync(header, body);
+        if (res.action_taken)
+            *action_result = res.action_taken->data();
+        else
+            *action_result = nullptr;
+        return std::to_underlying(res.id);
+    });
 }
 
 int NBSendPosSync(NBNotice *NB_NONNULL notice,
@@ -407,13 +447,14 @@ int NBSendPosSync(NBNotice *NB_NONNULL notice,
     char const *NB_NONNULL header,
     char const *NB_NULLABLE body,
     char const *NB_NULLABLE *NB_NULLABLE action_result) {
-
-    auto res = as(notice)->sendPosSync({x, y}, header, body);
-    if (res.action_taken)
-        *action_result = res.action_taken->data();
-    else
-        *action_result = nullptr;
-    return std::to_underlying(res.id);
+    return tryCatch(notice, "send synchrously with position", [&] {
+        auto res = as(notice)->sendPosSync({x, y}, header, body);
+        if (res.action_taken)
+            *action_result = res.action_taken->data();
+        else
+            *action_result = nullptr;
+        return std::to_underlying(res.id);
+    });
 }
 }
 
