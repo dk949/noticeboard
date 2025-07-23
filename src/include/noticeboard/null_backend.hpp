@@ -1,6 +1,6 @@
 #ifndef NOTICEBOARD_NULL_BACKEND_HPP
 #define NOTICEBOARD_NULL_BACKEND_HPP
-#include "backend.hpp"
+#include "noticeboard/backend.hpp"
 
 #include <sched.h>
 

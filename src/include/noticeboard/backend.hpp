@@ -1,7 +1,7 @@
 #ifndef NOTICEBOARD_BACKEND_HPP
 #define NOTICEBOARD_BACKEND_HPP
 
-#include "noticeboard.hpp"
+#include "noticeboard/noticeboard.hpp"
 
 namespace nb {
 class BackendError : public std::runtime_error {

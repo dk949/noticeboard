@@ -1,4 +1,4 @@
-#include "notify_send_backend.hpp"
+#include "noticeboard/notify_send_backend.hpp"
 
 #include <sys/wait.h>
 #include <unistd.h>

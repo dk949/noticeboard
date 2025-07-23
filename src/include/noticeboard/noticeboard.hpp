@@ -13,7 +13,7 @@
 #    error "this is a C++ file, do not include in C"
 #endif
 
-#include "noticeboard.h"
+#include "noticeboard/noticeboard.h"
 
 namespace nb {
 enum struct StandardCategory {

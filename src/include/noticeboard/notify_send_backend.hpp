@@ -1,6 +1,6 @@
 #ifndef NOTICEBOARD_NOTIFY_SEND_BACKEND_HPP
 #define NOTICEBOARD_NOTIFY_SEND_BACKEND_HPP
-#include "backend.hpp"
+#include "noticeboard/backend.hpp"
 
 namespace nb {
 class NotifySendError : public BackendError {

@@ -1,8 +1,8 @@
-#include "noticeboard.hpp"
+#include "noticeboard/noticeboard.hpp"
 
-#include "backend.hpp"
-#include "notify_send_backend.hpp"
-#include "null_backend.hpp"
+#include "noticeboard/backend.hpp"
+#include "noticeboard/notify_send_backend.hpp"
+#include "noticeboard/null_backend.hpp"
 
 #include <algorithm>
 #include <bit>
