@@ -1,5 +1,5 @@
-include(${CMAKE_SOURCE_DIR}/cmake/check_features.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake/warnings.cmake)
+include(${NOTICEB_ROOT}/cmake/check_features.cmake)
+include(${NOTICEB_ROOT}/cmake/warnings.cmake)
 
 add_library(noticeboard
     ${CMAKE_CURRENT_SOURCE_DIR}/noticeboard.cpp
