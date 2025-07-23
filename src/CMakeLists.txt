@@ -13,6 +13,11 @@ set(headers
     ${CMAKE_CURRENT_SOURCE_DIR}/null_backend.hpp
 )
 set_target_properties(noticeboard PROPERTIES PUBLIC_HEADER "${headers}")
+target_include_directories (noticeboard
+    PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>"
+        "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDE_DIR}>"
+)
 
 target_compile_features(noticeboard PUBLIC c_std_23)
 target_compile_features(noticeboard PUBLIC cxx_std_23)
