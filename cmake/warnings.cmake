@@ -1,4 +1,4 @@
-function(target_warnings target access)
+function(noticeboard_target_warnings target access)
     macro (no_error warn)
         target_compile_options(${target} ${access} "-W${warn}" "-Wno-error=${warn}")
     endmacro()

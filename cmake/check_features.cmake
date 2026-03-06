@@ -1,7 +1,7 @@
 include(CheckCSourceCompiles)
 include(CheckCXXSourceCompiles)
 
-function(target_have_nullable target access definition)
+function(noticeboard_target_have_nullable target access definition)
     set(src "
     void *_Nonnull ${definition}(int * _Nullable ptr) {(void)ptr;}
     void * _Nullable global;
@@ -24,7 +24,7 @@ endfunction()
 
 
 
-function(target_have_nonnull target access definition)
+function(noticeboard_target_have_nonnull target access definition)
     set(src "
     void *_Nonnull ${definition}(int * _Nonnull ptr) {(void)ptr;}
     void * _Nonnull global;

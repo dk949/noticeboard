@@ -5,16 +5,16 @@
 extern "C" {
 #endif
 
-#ifdef NB_HAVE_NULLABLE
-#    define NB_NULLABLE _Nullable
+#ifdef NOTICEBOARD_HAVE_NULLABLE
+#    define NOTICEBOARD_NULLABLE _Nullable
 #else
-#    define NB_NULLABLE
+#    define NOTICEBOARD_NULLABLE
 #endif
 
-#ifdef NB_HAVE_NONNULL
-#    define NB_NONNULL _Nonnull
+#ifdef NOTICEBOARD_HAVE_NONNULL
+#    define NOTICEBOARD_NONNULL _Nonnull
 #else
-#    define NB_NONNULL
+#    define NOTICEBOARD_NONNULL
 #endif
 
 typedef struct NBNotice NBNotice;
@@ -120,70 +120,70 @@ typedef enum NBBackend {
     NB_B_DBUS,
 } NBBackend;
 
-NBNotice *NB_NONNULL NBnewNotice(char const *NB_NONNULL app_name, NBBackend backend);
-NBNotice *NB_NONNULL NBcopyNotice(NBNotice const *NB_NONNULL notice);
-void NBdeleteNotice(NBNotice *NB_NULLABLE);
+NBNotice *NOTICEBOARD_NONNULL NBnewNotice(char const *NOTICEBOARD_NONNULL app_name, NBBackend backend);
+NBNotice *NOTICEBOARD_NONNULL NBcopyNotice(NBNotice const *NOTICEBOARD_NONNULL notice);
+void NBdeleteNotice(NBNotice *NOTICEBOARD_NULLABLE);
 
-char const *NB_NULLABLE NBerror(NBNotice const *NB_NONNULL notice);
+char const *NOTICEBOARD_NULLABLE NBerror(NBNotice const *NOTICEBOARD_NONNULL notice);
 
-void NBpushAction(NBNotice *NB_NONNULL, char const *NB_NONNULL name, char const *NB_NONNULL text);
-void NBpopAction(NBNotice *NB_NONNULL);
-void NBclearActions(NBNotice *NB_NONNULL);
-char const *NB_NULLABLE NBgetActionNameAt(NBNotice const *NB_NONNULL notice, unsigned index);
-char const *NB_NULLABLE NBgetActionTextAt(NBNotice const *NB_NONNULL notice, unsigned index);
+void NBpushAction(NBNotice *NOTICEBOARD_NONNULL, char const *NOTICEBOARD_NONNULL name, char const *NOTICEBOARD_NONNULL text);
+void NBpopAction(NBNotice *NOTICEBOARD_NONNULL);
+void NBclearActions(NBNotice *NOTICEBOARD_NONNULL);
+char const *NOTICEBOARD_NULLABLE NBgetActionNameAt(NBNotice const *NOTICEBOARD_NONNULL notice, unsigned index);
+char const *NOTICEBOARD_NULLABLE NBgetActionTextAt(NBNotice const *NOTICEBOARD_NONNULL notice, unsigned index);
 
-void NBpushHint(NBNotice *NB_NONNULL, int /*NBStandardHint*/ hint, ...);
-void NBpushCustomHint(NBNotice *NB_NONNULL, NBHintType type, char const *NB_NONNULL name, ...);
-void NBpopHint(NBNotice *NB_NONNULL);
-void NBclearHints(NBNotice *NB_NONNULL);
-unsigned NBgetHintCount(NBNotice const *NB_NONNULL notice);
-char const *NB_NULLABLE NBgetHintNameAt(NBNotice const *NB_NONNULL notice, unsigned index);
-NBHintType NBgetHintTypeAt(NBNotice const *NB_NONNULL notice, unsigned index);
-void const *NB_NULLABLE NBgetHintValueAt(NBNotice const *NB_NONNULL notice, unsigned index);
-NBHintType NBgetHintTypeByName(NBNotice const *NB_NONNULL notice, char const *NB_NONNULL name);
-void const *NB_NULLABLE NBgetHintValueByName(NBNotice const *NB_NONNULL notice, char const *NB_NONNULL name);
+void NBpushHint(NBNotice *NOTICEBOARD_NONNULL, int /*NBStandardHint*/ hint, ...);
+void NBpushCustomHint(NBNotice *NOTICEBOARD_NONNULL, NBHintType type, char const *NOTICEBOARD_NONNULL name, ...);
+void NBpopHint(NBNotice *NOTICEBOARD_NONNULL);
+void NBclearHints(NBNotice *NOTICEBOARD_NONNULL);
+unsigned NBgetHintCount(NBNotice const *NOTICEBOARD_NONNULL notice);
+char const *NOTICEBOARD_NULLABLE NBgetHintNameAt(NBNotice const *NOTICEBOARD_NONNULL notice, unsigned index);
+NBHintType NBgetHintTypeAt(NBNotice const *NOTICEBOARD_NONNULL notice, unsigned index);
+void const *NOTICEBOARD_NULLABLE NBgetHintValueAt(NBNotice const *NOTICEBOARD_NONNULL notice, unsigned index);
+NBHintType NBgetHintTypeByName(NBNotice const *NOTICEBOARD_NONNULL notice, char const *NOTICEBOARD_NONNULL name);
+void const *NOTICEBOARD_NULLABLE NBgetHintValueByName(NBNotice const *NOTICEBOARD_NONNULL notice, char const *NOTICEBOARD_NONNULL name);
 
-void NBsetCategory(NBNotice *NB_NONNULL, NBStandardCategory);
-void NBsetCustomCategory(NBNotice *NB_NONNULL, char const *NB_NONNULL);
-char const *NB_NULLABLE NBgetCategory(NBNotice const *NB_NONNULL notice);
+void NBsetCategory(NBNotice *NOTICEBOARD_NONNULL, NBStandardCategory);
+void NBsetCustomCategory(NBNotice *NOTICEBOARD_NONNULL, char const *NOTICEBOARD_NONNULL);
+char const *NOTICEBOARD_NULLABLE NBgetCategory(NBNotice const *NOTICEBOARD_NONNULL notice);
 
-void NBsetUrgency(NBNotice *NB_NONNULL, NBUrgency);
-NBUrgency NBgetUrgency(NBNotice *NB_NONNULL);
+void NBsetUrgency(NBNotice *NOTICEBOARD_NONNULL, NBUrgency);
+NBUrgency NBgetUrgency(NBNotice *NOTICEBOARD_NONNULL);
 
-void NBmakeTransient(NBNotice *NB_NONNULL);
-void NBmakeNotTransient(NBNotice *NB_NONNULL);
-int NBisTransient(NBNotice const *NB_NONNULL notice);
+void NBmakeTransient(NBNotice *NOTICEBOARD_NONNULL);
+void NBmakeNotTransient(NBNotice *NOTICEBOARD_NONNULL);
+int NBisTransient(NBNotice const *NOTICEBOARD_NONNULL notice);
 
-void NBsetAppName(NBNotice *NB_NONNULL, char const *NB_NONNULL);
-char const *NB_NONNULL NBgetAppName(NBNotice const *NB_NONNULL notice);
+void NBsetAppName(NBNotice *NOTICEBOARD_NONNULL, char const *NOTICEBOARD_NONNULL);
+char const *NOTICEBOARD_NONNULL NBgetAppName(NBNotice const *NOTICEBOARD_NONNULL notice);
 
-void NBsetIcon(NBNotice *NB_NONNULL, char const *NB_NULLABLE);
-char const *NB_NONNULL NBgetIcon(NBNotice const *NB_NONNULL notice);
+void NBsetIcon(NBNotice *NOTICEBOARD_NONNULL, char const *NOTICEBOARD_NULLABLE);
+char const *NOTICEBOARD_NONNULL NBgetIcon(NBNotice const *NOTICEBOARD_NONNULL notice);
 
-void NBsetExpireTime(NBNotice *NB_NONNULL, int);
-int NBgetExpireTime(NBNotice const *NB_NONNULL notice);
+void NBsetExpireTime(NBNotice *NOTICEBOARD_NONNULL, int);
+int NBgetExpireTime(NBNotice const *NOTICEBOARD_NONNULL notice);
 
-int NBSend(NBNotice *NB_NONNULL,  //
-    char const *NB_NONNULL header,
-    char const *NB_NULLABLE body);
+int NBSend(NBNotice *NOTICEBOARD_NONNULL,  //
+    char const *NOTICEBOARD_NONNULL header,
+    char const *NOTICEBOARD_NULLABLE body);
 
-int NBSendPos(NBNotice *NB_NONNULL,  //
+int NBSendPos(NBNotice *NOTICEBOARD_NONNULL,  //
     int x,
     int y,
-    char const *NB_NONNULL header,
-    char const *NB_NULLABLE body);
+    char const *NOTICEBOARD_NONNULL header,
+    char const *NOTICEBOARD_NULLABLE body);
 
-int NBSendSync(NBNotice *NB_NONNULL,  //
-    char const *NB_NONNULL header,
-    char const *NB_NULLABLE body,
-    char const *NB_NULLABLE *NB_NULLABLE action_result);
+int NBSendSync(NBNotice *NOTICEBOARD_NONNULL,  //
+    char const *NOTICEBOARD_NONNULL header,
+    char const *NOTICEBOARD_NULLABLE body,
+    char const *NOTICEBOARD_NULLABLE *NOTICEBOARD_NULLABLE action_result);
 
-int NBSendPosSync(NBNotice *NB_NONNULL,
+int NBSendPosSync(NBNotice *NOTICEBOARD_NONNULL,
     int x,
     int y,
-    char const *NB_NONNULL header,
-    char const *NB_NULLABLE body,
-    char const *NB_NULLABLE *NB_NULLABLE action_result);
+    char const *NOTICEBOARD_NONNULL header,
+    char const *NOTICEBOARD_NULLABLE body,
+    char const *NOTICEBOARD_NULLABLE *NOTICEBOARD_NULLABLE action_result);
 
 #ifdef __cplusplus
 }

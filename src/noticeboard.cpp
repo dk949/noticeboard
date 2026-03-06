@@ -185,7 +185,7 @@ auto tryCatch(NBNotice const *notice,
 
 extern "C" {
 
-NBNotice *NB_NONNULL NBnewNotice(char const *NB_NONNULL app_name, NBBackend backend) {
+NBNotice *NOTICEBOARD_NONNULL NBnewNotice(char const *NOTICEBOARD_NONNULL app_name, NBBackend backend) {
     try {
         return new nb::Notice(app_name, as(backend));
     } catch (std::exception const &e) {
@@ -195,22 +195,22 @@ NBNotice *NB_NONNULL NBnewNotice(char const *NB_NONNULL app_name, NBBackend back
     }
 }
 
-NBNotice *NB_NONNULL NBcopyNotice(NBNotice const *NB_NONNULL notice) {
+NBNotice *NOTICEBOARD_NONNULL NBcopyNotice(NBNotice const *NOTICEBOARD_NONNULL notice) {
     return tryCatch(notice, "clone NBNotice", [&] {  //
         return new nb::Notice(*as(notice));
     });
 }
 
-void NBdeleteNotice(NBNotice *NB_NULLABLE notice) {
+void NBdeleteNotice(NBNotice *NOTICEBOARD_NULLABLE notice) {
     delete as(notice);
 }
 
-char const *NB_NULLABLE NBerror(NBNotice const *NB_NONNULL notice) {
+char const *NOTICEBOARD_NULLABLE NBerror(NBNotice const *NOTICEBOARD_NONNULL notice) {
     if (notice->m_error.empty()) return nullptr;
     return notice->m_error.c_str();
 }
 
-void NBpushAction(NBNotice *NB_NONNULL notice, char const *NB_NONNULL name, char const *NB_NONNULL text) {
+void NBpushAction(NBNotice *NOTICEBOARD_NONNULL notice, char const *NOTICEBOARD_NONNULL name, char const *NOTICEBOARD_NONNULL text) {
     if (!name[0] || !text[0]) {
         internalSetError(notice, "Both 'name' and 'text' have to not be empty");
         return;
@@ -223,26 +223,26 @@ void NBpushAction(NBNotice *NB_NONNULL notice, char const *NB_NONNULL name, char
     });
 }
 
-void NBpopAction(NBNotice *NB_NONNULL notice) {
+void NBpopAction(NBNotice *NOTICEBOARD_NONNULL notice) {
     as(notice)->popAction();
 }
 
-void NBclearActions(NBNotice *NB_NONNULL notice) {
+void NBclearActions(NBNotice *NOTICEBOARD_NONNULL notice) {
     as(notice)->clearActions();
 }
 
-char const *NB_NULLABLE NBgetActionNameAt(NBNotice const *NB_NONNULL notice, unsigned index) {
+char const *NOTICEBOARD_NULLABLE NBgetActionNameAt(NBNotice const *NOTICEBOARD_NONNULL notice, unsigned index) {
     if (index >= as(notice)->actionCount()) return nullptr;
     auto const &name = as(notice)->actionAt(as(index)).name;
     return name.c_str();
 }
 
-char const *NB_NULLABLE NBgetActionTextAt(NBNotice const *NB_NONNULL notice, unsigned index) {
+char const *NOTICEBOARD_NULLABLE NBgetActionTextAt(NBNotice const *NOTICEBOARD_NONNULL notice, unsigned index) {
     if (index >= as(notice)->actionCount()) return nullptr;
     return as(notice)->actionAt(as(index)).text.c_str();
 }
 
-void NBpushHint(NBNotice *NB_NONNULL notice, int hint, ...) {
+void NBpushHint(NBNotice *NOTICEBOARD_NONNULL notice, int hint, ...) {
     va_list args;
     va_start(args, hint);
     return tryCatch(notice, "push hint", [&] {
@@ -260,7 +260,7 @@ void NBpushHint(NBNotice *NB_NONNULL notice, int hint, ...) {
     va_end(args);
 }
 
-void NBpushCustomHint(NBNotice *NB_NONNULL notice, NBHintType type, char const *NB_NONNULL name, ...) {
+void NBpushCustomHint(NBNotice *NOTICEBOARD_NONNULL notice, NBHintType type, char const *NOTICEBOARD_NONNULL name, ...) {
     va_list args;
     va_start(args, name);
 
@@ -281,44 +281,44 @@ void NBpushCustomHint(NBNotice *NB_NONNULL notice, NBHintType type, char const *
     va_end(args);
 }
 
-void NBpopHint(NBNotice *NB_NONNULL notice) {
+void NBpopHint(NBNotice *NOTICEBOARD_NONNULL notice) {
     as(notice)->popHint();
 }
 
-void NBclearHints(NBNotice *NB_NONNULL notice) {
+void NBclearHints(NBNotice *NOTICEBOARD_NONNULL notice) {
     as(notice)->clearHints();
 }
 
-unsigned NBgetHintCount(NBNotice const *NB_NONNULL notice) {
+unsigned NBgetHintCount(NBNotice const *NOTICEBOARD_NONNULL notice) {
     return as(as(notice)->hintCount());
 }
 
-char const *NB_NULLABLE NBgetHintNameAt(NBNotice const *NB_NONNULL notice, unsigned index) {
+char const *NOTICEBOARD_NULLABLE NBgetHintNameAt(NBNotice const *NOTICEBOARD_NONNULL notice, unsigned index) {
     if (as(notice)->hintCount() >= index) return nullptr;
     return as(notice)->hintAt(as(index)).name().data();
 }
 
-NBHintType NBgetHintTypeAt(NBNotice const *NB_NONNULL notice, unsigned index) {
+NBHintType NBgetHintTypeAt(NBNotice const *NOTICEBOARD_NONNULL notice, unsigned index) {
     if (as(notice)->hintCount() >= index) return NB_HT_VOID;
     return as(as(notice)->hintAt(as(index)).type());
 }
 
-void const *NB_NULLABLE NBgetHintValueAt(NBNotice const *NB_NONNULL notice, unsigned index) {
+void const *NOTICEBOARD_NULLABLE NBgetHintValueAt(NBNotice const *NOTICEBOARD_NONNULL notice, unsigned index) {
     if (as(notice)->hintCount() >= index) return nullptr;
     return hintValueToVoidP(as(notice)->hintAt(as(index)).value());
 }
 
-NBHintType NBgetHintTypeByName(NBNotice const *NB_NONNULL notice, char const *NB_NONNULL name) {
+NBHintType NBgetHintTypeByName(NBNotice const *NOTICEBOARD_NONNULL notice, char const *NOTICEBOARD_NONNULL name) {
     if (!as(notice)->hasHint(name)) return NB_HT_VOID;
     return as(as(notice)->hintAt(name).type());
 }
 
-void const *NB_NULLABLE NBgetHintValueByName(NBNotice const *NB_NONNULL notice, char const *NB_NONNULL name) {
+void const *NOTICEBOARD_NULLABLE NBgetHintValueByName(NBNotice const *NOTICEBOARD_NONNULL notice, char const *NOTICEBOARD_NONNULL name) {
     if (!as(notice)->hasHint(name)) return nullptr;
     return hintValueToVoidP(as(notice)->hintValueAt(name));
 }
 
-void NBsetCategory(NBNotice *NB_NONNULL notice, NBStandardCategory cat) {
+void NBsetCategory(NBNotice *NOTICEBOARD_NONNULL notice, NBStandardCategory cat) {
     switch (cat) {
         case NB_C_NONE:
         case NB_C_CALL:
@@ -349,19 +349,19 @@ void NBsetCategory(NBNotice *NB_NONNULL notice, NBStandardCategory cat) {
     }
 }
 
-void NBsetCustomCategory(NBNotice *NB_NONNULL notice, char const *NB_NONNULL name) {
+void NBsetCustomCategory(NBNotice *NOTICEBOARD_NONNULL notice, char const *NOTICEBOARD_NONNULL name) {
     return tryCatch(notice, "set custom category", [&] {  //
         as(notice)->setCategory(name);
     });
 }
 
-char const *NB_NULLABLE NBgetCategory(NBNotice const *NB_NONNULL notice) {
+char const *NOTICEBOARD_NULLABLE NBgetCategory(NBNotice const *NOTICEBOARD_NONNULL notice) {
     auto cat = as(notice)->getCategory();
     if (cat.empty()) return nullptr;
     return cat.data();
 }
 
-void NBsetUrgency(NBNotice *NB_NONNULL notice, NBUrgency urgency) {
+void NBsetUrgency(NBNotice *NOTICEBOARD_NONNULL notice, NBUrgency urgency) {
     switch (urgency) {
         case NB_U_LOW:
         case NB_U_NORMAL:
@@ -370,69 +370,69 @@ void NBsetUrgency(NBNotice *NB_NONNULL notice, NBUrgency urgency) {
     }
 }
 
-NBUrgency NBgetUrgency(NBNotice *NB_NONNULL notice) {
+NBUrgency NBgetUrgency(NBNotice *NOTICEBOARD_NONNULL notice) {
     return as(notice->urgency);
 }
 
-void NBmakeTransient(NBNotice *NB_NONNULL notice) {
+void NBmakeTransient(NBNotice *NOTICEBOARD_NONNULL notice) {
     notice->transient = true;
 }
 
-void NBmakeNotTransient(NBNotice *NB_NONNULL notice) {
+void NBmakeNotTransient(NBNotice *NOTICEBOARD_NONNULL notice) {
     notice->transient = false;
 }
 
-int NBisTransient(NBNotice const *NB_NONNULL notice) {
+int NBisTransient(NBNotice const *NOTICEBOARD_NONNULL notice) {
     return notice->transient;
 }
 
-void NBsetAppName(NBNotice *NB_NONNULL notice, char const *NB_NONNULL name) {
+void NBsetAppName(NBNotice *NOTICEBOARD_NONNULL notice, char const *NOTICEBOARD_NONNULL name) {
     notice->app_name = name;
 }
 
-char const *NB_NONNULL NBgetAppName(NBNotice const *NB_NONNULL notice) {
+char const *NOTICEBOARD_NONNULL NBgetAppName(NBNotice const *NOTICEBOARD_NONNULL notice) {
     return notice->app_name.c_str();
 }
 
-void NBsetIcon(NBNotice *NB_NONNULL notice, char const *NB_NULLABLE icon) {
+void NBsetIcon(NBNotice *NOTICEBOARD_NONNULL notice, char const *NOTICEBOARD_NULLABLE icon) {
     notice->icon = icon;
 }
 
-char const *NB_NONNULL NBgetIcon(NBNotice const *NB_NONNULL notice) {
+char const *NOTICEBOARD_NONNULL NBgetIcon(NBNotice const *NOTICEBOARD_NONNULL notice) {
     return notice->icon.c_str();
 }
 
-void NBsetExpireTime(NBNotice *NB_NONNULL notice, int time) {
+void NBsetExpireTime(NBNotice *NOTICEBOARD_NONNULL notice, int time) {
     notice->expire_time = time;
 }
 
-int NBgetExpireTime(NBNotice const *NB_NONNULL notice) {
+int NBgetExpireTime(NBNotice const *NOTICEBOARD_NONNULL notice) {
     return notice->expire_time;
 }
 
-int NBSend(NBNotice *NB_NONNULL notice,  //
-    char const *NB_NONNULL header,
-    char const *NB_NULLABLE body) {
+int NBSend(NBNotice *NOTICEBOARD_NONNULL notice,  //
+    char const *NOTICEBOARD_NONNULL header,
+    char const *NOTICEBOARD_NULLABLE body) {
     return tryCatch(notice, "send", [&] {  //
         return std::to_underlying(as(notice)->send(header, body));
     });
 }
 
-int NBSendPos(NBNotice *NB_NONNULL notice,  //
+int NBSendPos(NBNotice *NOTICEBOARD_NONNULL notice,  //
     int x,
     int y,
-    char const *NB_NONNULL header,
-    char const *NB_NULLABLE body) {
+    char const *NOTICEBOARD_NONNULL header,
+    char const *NOTICEBOARD_NULLABLE body) {
 
     return tryCatch(notice, "send with position", [&] {  //
         return std::to_underlying(as(notice)->sendPos({x, y}, header, body));
     });
 }
 
-int NBSendSync(NBNotice *NB_NONNULL notice,  //
-    char const *NB_NONNULL header,
-    char const *NB_NULLABLE body,
-    char const *NB_NULLABLE *NB_NULLABLE action_result) {
+int NBSendSync(NBNotice *NOTICEBOARD_NONNULL notice,  //
+    char const *NOTICEBOARD_NONNULL header,
+    char const *NOTICEBOARD_NULLABLE body,
+    char const *NOTICEBOARD_NULLABLE *NOTICEBOARD_NULLABLE action_result) {
     return tryCatch(notice, "send synchrously", [&] {
         auto res = as(notice)->sendSync(header, body);
         if (res.action_taken)
@@ -443,12 +443,12 @@ int NBSendSync(NBNotice *NB_NONNULL notice,  //
     });
 }
 
-int NBSendPosSync(NBNotice *NB_NONNULL notice,
+int NBSendPosSync(NBNotice *NOTICEBOARD_NONNULL notice,
     int x,
     int y,
-    char const *NB_NONNULL header,
-    char const *NB_NULLABLE body,
-    char const *NB_NULLABLE *NB_NULLABLE action_result) {
+    char const *NOTICEBOARD_NONNULL header,
+    char const *NOTICEBOARD_NULLABLE body,
+    char const *NOTICEBOARD_NULLABLE *NOTICEBOARD_NULLABLE action_result) {
     return tryCatch(notice, "send synchrously with position", [&] {
         auto res = as(notice)->sendPosSync({x, y}, header, body);
         if (res.action_taken)
