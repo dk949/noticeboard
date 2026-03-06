@@ -2,3 +2,4 @@
 build
 out
 src/compile_commands.json
+tests/compile_commands.json

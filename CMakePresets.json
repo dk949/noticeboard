@@ -10,7 +10,7 @@
       "cacheVariables": {
         "CMAKE_DEFAULT_BUILD_TYPE": "Debug",
         "CMAKE_EXPORT_COMPILE_COMMANDS": true,
-        "NOTICEBOARD_BUILD_TESTING": true
+        "NOTICEBOARD_BUILD_TESTING": false
       }
     },
     {
