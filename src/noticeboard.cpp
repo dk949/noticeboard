@@ -210,7 +210,9 @@ char const *NOTICEBOARD_NULLABLE NBerror(NBNotice const *NOTICEBOARD_NONNULL not
     return notice->m_error.c_str();
 }
 
-void NBpushAction(NBNotice *NOTICEBOARD_NONNULL notice, char const *NOTICEBOARD_NONNULL name, char const *NOTICEBOARD_NONNULL text) {
+void NBpushAction(NBNotice *NOTICEBOARD_NONNULL notice,
+    char const *NOTICEBOARD_NONNULL name,
+    char const *NOTICEBOARD_NONNULL text) {
     if (!name[0] || !text[0]) {
         internalSetError(notice, "Both 'name' and 'text' have to not be empty");
         return;
@@ -313,7 +315,9 @@ NBHintType NBgetHintTypeByName(NBNotice const *NOTICEBOARD_NONNULL notice, char 
     return as(as(notice)->hintAt(name).type());
 }
 
-void const *NOTICEBOARD_NULLABLE NBgetHintValueByName(NBNotice const *NOTICEBOARD_NONNULL notice, char const *NOTICEBOARD_NONNULL name) {
+void const *NOTICEBOARD_NULLABLE NBgetHintValueByName(  //
+    NBNotice const *NOTICEBOARD_NONNULL notice,
+    char const *NOTICEBOARD_NONNULL name) {
     if (!as(notice)->hasHint(name)) return nullptr;
     return hintValueToVoidP(as(notice)->hintValueAt(name));
 }
@@ -432,7 +436,7 @@ int NBSendPos(NBNotice *NOTICEBOARD_NONNULL notice,  //
 int NBSendSync(NBNotice *NOTICEBOARD_NONNULL notice,  //
     char const *NOTICEBOARD_NONNULL header,
     char const *NOTICEBOARD_NULLABLE body,
-    char const *NOTICEBOARD_NULLABLE *NOTICEBOARD_NULLABLE action_result) {
+    char const * NOTICEBOARD_NULLABLE * NOTICEBOARD_NULLABLE action_result) {
     return tryCatch(notice, "send synchrously", [&] {
         auto res = as(notice)->sendSync(header, body);
         if (res.action_taken)
@@ -448,7 +452,7 @@ int NBSendPosSync(NBNotice *NOTICEBOARD_NONNULL notice,
     int y,
     char const *NOTICEBOARD_NONNULL header,
     char const *NOTICEBOARD_NULLABLE body,
-    char const *NOTICEBOARD_NULLABLE *NOTICEBOARD_NULLABLE action_result) {
+    char const * NOTICEBOARD_NULLABLE * NOTICEBOARD_NULLABLE action_result) {
     return tryCatch(notice, "send synchrously with position", [&] {
         auto res = as(notice)->sendPosSync({x, y}, header, body);
         if (res.action_taken)

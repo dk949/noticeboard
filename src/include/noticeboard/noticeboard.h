@@ -126,7 +126,9 @@ void NBdeleteNotice(NBNotice *NOTICEBOARD_NULLABLE);
 
 char const *NOTICEBOARD_NULLABLE NBerror(NBNotice const *NOTICEBOARD_NONNULL notice);
 
-void NBpushAction(NBNotice *NOTICEBOARD_NONNULL, char const *NOTICEBOARD_NONNULL name, char const *NOTICEBOARD_NONNULL text);
+void NBpushAction(NBNotice *NOTICEBOARD_NONNULL,
+    char const *NOTICEBOARD_NONNULL name,
+    char const *NOTICEBOARD_NONNULL text);
 void NBpopAction(NBNotice *NOTICEBOARD_NONNULL);
 void NBclearActions(NBNotice *NOTICEBOARD_NONNULL);
 char const *NOTICEBOARD_NULLABLE NBgetActionNameAt(NBNotice const *NOTICEBOARD_NONNULL notice, unsigned index);
@@ -141,7 +143,9 @@ char const *NOTICEBOARD_NULLABLE NBgetHintNameAt(NBNotice const *NOTICEBOARD_NON
 NBHintType NBgetHintTypeAt(NBNotice const *NOTICEBOARD_NONNULL notice, unsigned index);
 void const *NOTICEBOARD_NULLABLE NBgetHintValueAt(NBNotice const *NOTICEBOARD_NONNULL notice, unsigned index);
 NBHintType NBgetHintTypeByName(NBNotice const *NOTICEBOARD_NONNULL notice, char const *NOTICEBOARD_NONNULL name);
-void const *NOTICEBOARD_NULLABLE NBgetHintValueByName(NBNotice const *NOTICEBOARD_NONNULL notice, char const *NOTICEBOARD_NONNULL name);
+void const *NOTICEBOARD_NULLABLE NBgetHintValueByName(  //
+    NBNotice const *NOTICEBOARD_NONNULL notice,
+    char const *NOTICEBOARD_NONNULL name);
 
 void NBsetCategory(NBNotice *NOTICEBOARD_NONNULL, NBStandardCategory);
 void NBsetCustomCategory(NBNotice *NOTICEBOARD_NONNULL, char const *NOTICEBOARD_NONNULL);
@@ -176,14 +180,14 @@ int NBSendPos(NBNotice *NOTICEBOARD_NONNULL,  //
 int NBSendSync(NBNotice *NOTICEBOARD_NONNULL,  //
     char const *NOTICEBOARD_NONNULL header,
     char const *NOTICEBOARD_NULLABLE body,
-    char const *NOTICEBOARD_NULLABLE *NOTICEBOARD_NULLABLE action_result);
+    char const * NOTICEBOARD_NULLABLE * NOTICEBOARD_NULLABLE action_result);
 
 int NBSendPosSync(NBNotice *NOTICEBOARD_NONNULL,
     int x,
     int y,
     char const *NOTICEBOARD_NONNULL header,
     char const *NOTICEBOARD_NULLABLE body,
-    char const *NOTICEBOARD_NULLABLE *NOTICEBOARD_NULLABLE action_result);
+    char const * NOTICEBOARD_NULLABLE * NOTICEBOARD_NULLABLE action_result);
 
 #ifdef __cplusplus
 }
