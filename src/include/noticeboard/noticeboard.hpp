@@ -173,14 +173,31 @@ struct Notice : public NBNotice {
     explicit Notice(std::string app_name, Backend backend = Backend::Default);
     Notice(std::string app_name, std::unique_ptr<BackendBase> backend);
 
-
-    NoticeId send(std::string_view header, std::string_view body = {}, NoticeId replace = NoticeId::NoReplace) const;
-    SendResponse sendSync(std::string_view header, std::string_view body = {}, NoticeId replace = NoticeId::NoReplace) const;
+    NoticeId send(  //
+        std::string_view header,
+        std::string_view body = {},
+        NoticeId replace = NoticeId::NoReplace) const;
+    NoticeId send(  //
+        Pos pos,
+        std::string_view header,
+        std::string_view body = {},
+        NoticeId replace = NoticeId::NoReplace) const;
+    SendResponse sendSync(  //
+        std::string_view header,
+        std::string_view body = {},
+        NoticeId replace = NoticeId::NoReplace) const;
+    SendResponse sendSync(  //
+        Pos pos,
+        std::string_view header,
+        std::string_view body = {},
+        NoticeId replace = NoticeId::NoReplace) const;
+    [[deprecated("Use send with position argument instead")]]
     NoticeId sendPos(  //
         Pos pos,
         std::string_view header,
         std::string_view body = {},
         NoticeId replace = NoticeId::NoReplace) const;
+    [[deprecated("Use sendSync with position argument instead")]]
     SendResponse sendPosSync(  //
         Pos pos,
         std::string_view header,

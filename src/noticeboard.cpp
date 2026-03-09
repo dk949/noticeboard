@@ -429,7 +429,7 @@ int NBSendPos(NBNotice *NOTICEBOARD_NONNULL notice,  //
     char const *NOTICEBOARD_NULLABLE body) {
 
     return tryCatch(notice, "send with position", [&] {  //
-        return std::to_underlying(as(notice)->sendPos({x, y}, header, body));
+        return std::to_underlying(as(notice)->send({x, y}, header, body));
     });
 }
 
@@ -454,7 +454,7 @@ int NBSendPosSync(NBNotice *NOTICEBOARD_NONNULL notice,
     char const *NOTICEBOARD_NULLABLE body,
     char const * NOTICEBOARD_NULLABLE * NOTICEBOARD_NULLABLE action_result) {
     return tryCatch(notice, "send synchrously with position", [&] {
-        auto res = as(notice)->sendPosSync({x, y}, header, body);
+        auto res = as(notice)->sendSync({x, y}, header, body);
         if (res.action_taken)
             *action_result = res.action_taken->data();
         else
@@ -521,6 +521,10 @@ SendResponse Notice::sendSync(std::string_view header, std::string_view body, No
 }
 
 NoticeId Notice::sendPos(Pos pos, std::string_view header, std::string_view body, NoticeId replace) const {
+    return send(pos, header, body, replace);
+}
+
+NoticeId Notice::send(Pos pos, std::string_view header, std::string_view body, NoticeId replace) const {
     return m_backend
         ->send(*this,
             header,
@@ -534,6 +538,10 @@ NoticeId Notice::sendPos(Pos pos, std::string_view header, std::string_view body
 }
 
 SendResponse Notice::sendPosSync(Pos pos, std::string_view header, std::string_view body, NoticeId replace) const {
+    return sendSync(pos, header, body, replace);
+}
+
+SendResponse Notice::sendSync(Pos pos, std::string_view header, std::string_view body, NoticeId replace) const {
     return m_backend->send(*this,
         header,
         body,
