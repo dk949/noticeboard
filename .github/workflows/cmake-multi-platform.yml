@@ -43,7 +43,7 @@ jobs:
 
     # https://stackoverflow.com/a/67791068
     - name: switch to gcc-${{ steps.strings.outputs.gcc-ver }}
-      if: matrix.configurations.os == "ubuntu-latest" && matrix.configurations.c_compiler == gcc
+      if: ${{ matrix.configurations.os == 'ubuntu-latest' && matrix.configurations.c_compiler == 'gcc' }}
       run: |
         sudo apt install gcc-${{ steps.strings.outputs.gcc-ver }} g++-${{ steps.strings.outputs.gcc-ver }}
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ steps.strings.outputs.gcc-ver }} ${{ steps.strings.outputs.gcc-ver }}0
@@ -52,7 +52,7 @@ jobs:
         sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++-${{ steps.strings.outputs.gcc-ver }} ${{ steps.strings.outputs.gcc-ver }}0
 
     - name: switch to clang-${{ steps.strings.outputs.clang-ver }}
-      if: matrix.configurations.os == "ubuntu-latest" && matrix.configurations.c_compiler == clang
+      if: ${{ matrix.configurations.os == 'ubuntu-latest' && matrix.configurations.c_compiler == 'clang' }}
       run: |
         sudo apt install clang-${{ steps.strings.outputs.clang-ver }}
         sudo update-alternatives --install /usr/bin/clang  clang  /usr/bin/clang-${{ steps.strings.outputs.clang-ver }} ${{ steps.strings.outputs.clang-ver }}0
