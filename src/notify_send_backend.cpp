@@ -241,7 +241,7 @@ std::vector<std::string> NotifySendBackend::constructArgs(  //
         addHint(Hint::custom("transient", true));
     }
 
-    if (opts.replace != NO_REPLACE) {
+    if (opts.replace != NoticeId::NoReplace) {
         out.emplace_back("-r");
         out.push_back(std::format("{}", std::to_underlying(opts.replace)));
     }

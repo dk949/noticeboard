@@ -120,14 +120,15 @@ struct Pos {
     bool operator==(Pos const &) const = default;
 };
 
-enum struct NoticeId { };
+enum struct NoticeId { NoReplace = -1 };
 
 struct SendResponse {
     NoticeId id;
     std::optional<std::string_view> action_taken;
 };
 
-inline constexpr auto const NO_REPLACE = NoticeId(-1);
+[[deprecated("Use NoticeId::NoReplace instead")]]
+inline constexpr auto const NO_REPLACE = NoticeId::NoReplace;
 inline constexpr auto const DEFAULT_EXPIRE = 0;
 
 class BackendBase;
@@ -170,14 +171,18 @@ struct Notice : public NBNotice {
     Notice(std::string app_name, std::unique_ptr<BackendBase> backend);
 
 
-    NoticeId send(std::string_view header, std::string_view body = {}, NoticeId replace = NO_REPLACE) const;
-    SendResponse sendSync(std::string_view header, std::string_view body = {}, NoticeId replace = NO_REPLACE) const;
-    NoticeId sendPos(Pos pos, std::string_view header, std::string_view body = {}, NoticeId replace = NO_REPLACE) const;
+    NoticeId send(std::string_view header, std::string_view body = {}, NoticeId replace = NoticeId::NoReplace) const;
+    SendResponse sendSync(std::string_view header, std::string_view body = {}, NoticeId replace = NoticeId::NoReplace) const;
+    NoticeId sendPos(  //
+        Pos pos,
+        std::string_view header,
+        std::string_view body = {},
+        NoticeId replace = NoticeId::NoReplace) const;
     SendResponse sendPosSync(  //
         Pos pos,
         std::string_view header,
         std::string_view body = {},
-        NoticeId replace = NO_REPLACE) const;
+        NoticeId replace = NoticeId::NoReplace) const;
 
     void pushAction(Action);
     void clearActions() noexcept;
