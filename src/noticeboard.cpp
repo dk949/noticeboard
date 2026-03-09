@@ -678,14 +678,7 @@ Hint Hint::suppressSound(bool value) {
 }
 
 Hint Hint::custom(std::string name, HintValue value) noexcept {
-    auto type = std::visit([]<typename T>(T const &) {
-        using D = std::remove_cvref_t<T>;
-        if constexpr (std::is_same_v<bool, D>) return nb::HintType::Boolean;
-        if constexpr (std::is_same_v<std::uint8_t, D>) return nb::HintType::Byte;
-        if constexpr (std::is_same_v<int, D>) return nb::HintType::Int;
-        if constexpr (std::is_same_v<double, D>) return nb::HintType::Double;
-        if constexpr (std::is_same_v<std::string, D>) return nb::HintType::String;
-    }, value);
+    auto type = std::visit([]<typename T>(T const &) { return Hint::type_to_enum_v<std::remove_cvref_t<T>>; }, value);
     return {type, std::move(name), std::move(value)};
 }
 

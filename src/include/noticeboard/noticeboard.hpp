@@ -79,6 +79,7 @@ using Category = std::variant<StandardCategory, std::string>;
 struct Action {
     std::string name;
     std::string text;
+    bool operator==(Action const &) const = default;
 };
 
 using HintValue = std::variant<bool, std::uint8_t, int, double, std::string>;
@@ -112,6 +113,70 @@ public:
     std::string valueStr() const;
 private:
     Hint(HintType, HintName, HintValue) noexcept;
+
+private:
+    template<typename T>
+    struct type_to_enum;
+
+
+    template<HintType T>
+    struct enum_to_type;
+
+public:
+    template<typename T>
+    static inline constexpr auto type_to_enum_v = type_to_enum<T>::value;
+    template<HintType T>
+    using enum_to_type_t = enum_to_type<T>::type;
+};
+
+template<>
+struct Hint::type_to_enum<bool> {
+    static constexpr auto value = HintType::Boolean;
+};
+
+template<>
+struct Hint::type_to_enum<int> {
+    static constexpr auto value = HintType::Int;
+};
+
+template<>
+struct Hint::type_to_enum<double> {
+    static constexpr auto value = HintType::Double;
+};
+
+template<>
+struct Hint::type_to_enum<std::string> {
+    static constexpr auto value = HintType::String;
+};
+
+template<>
+struct Hint::type_to_enum<std::uint8_t> {
+    static constexpr auto value = HintType::Byte;
+};
+
+template<>
+struct Hint::enum_to_type<HintType::Boolean> {
+    using type = bool;
+};
+
+template<>
+struct Hint::enum_to_type<HintType::Int> {
+    using type = int;
+};
+
+template<>
+struct Hint::enum_to_type<HintType::Double> {
+    using type = double;
+};
+
+template<>
+struct Hint::enum_to_type<HintType::String> {
+    using type = std::string;
+};
+
+template<>
+struct Hint::enum_to_type<HintType::Byte> {
+    using type = std::uint8_t;
 };
 
 struct Pos {
@@ -234,6 +299,37 @@ struct Notice : public NBNotice {
     [[nodiscard]]
     std::string_view urgencyStr() const;
 };
+
+template<std::size_t N, typename Variant>
+std::variant_alternative_t<N, Variant> const &get(Variant const &v) {
+    return std::get<N>(v);
+}
+
+template<std::size_t N, typename Variant>
+std::variant_alternative_t<N, Variant> &get(Variant &v) {
+    return std::get<N>(v);
+}
+
+template<typename T, typename Variant>
+T const &get(Variant const &v) {
+    return std::get<T>(v);
+}
+
+template<typename T, typename Variant>
+T &get(Variant &v) {
+    return std::get<T>(v);
+}
+
+template<HintType T, typename Variant>
+Hint::enum_to_type_t<T> const &get(Variant const &v) {
+    return std::get<Hint::enum_to_type_t<T>>(v);
+}
+
+template<HintType T, typename Variant>
+Hint::enum_to_type_t<T> &get(Variant &v) {
+    return std::get<Hint::enum_to_type_t<T>>(v);
+}
+
 }  // namespace nb
 
 #endif  // NOTICEBOARD_HPP
