@@ -35,8 +35,8 @@ jobs:
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-        echo "gcc-ver=14" >> "$GITHUB_OUTPUT"
-        echo "clang-ver=19" >> "$GITHUB_OUTPUT"
+        echo "gcc-ver=15" >> "$GITHUB_OUTPUT"
+        echo "clang-ver=20" >> "$GITHUB_OUTPUT"
 
     # https://stackoverflow.com/a/67791068
     - name: switch to gcc-${{ steps.strings.outputs.gcc-ver }}
