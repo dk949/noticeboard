@@ -180,7 +180,8 @@ static nb::SendResponse parseResponse(std::string_view sv, std::vector<nb::Actio
 
 static std::string runNotifySend(std::vector<std::string> &args) {
     int fds[2];
-    pipe(fds);
+    if (pipe(fds)) throw nb::NotifySendError(std::format("Failed to run pipe: {}", std::strerror(errno)));
+
     FD read {fds[0]};
     FD write {fds[1]};
     std::string out;
