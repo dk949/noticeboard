@@ -11,7 +11,9 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Catch2)
 
 add_executable(noticeboard_test noticeboard_test.cpp)
-target_link_libraries(noticeboard_test PRIVATE Catch2::Catch2WithMain)
+target_compile_features(noticeboard_test PRIVATE c_std_23)
+target_compile_features(noticeboard_test PRIVATE cxx_std_23)
+target_link_libraries(noticeboard_test PRIVATE Catch2::Catch2WithMain noticeboard)
 
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 include(CTest)
