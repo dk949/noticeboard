@@ -11,7 +11,6 @@
 #include <cstring>
 #include <filesystem>
 #include <format>
-#include <print>
 #include <ranges>
 #include <stdexcept>
 #include <string>
@@ -113,7 +112,7 @@ static void spawnNotifySend(std::vector<std::string> &args, FD fd) {
         argv.push_back(arg.data());
     argv.push_back(nullptr);
     execvp(argv[0], argv.data());
-    std::println("Failed to execvp(notify-send): {}", std::strerror(errno));
+    std::printf("Failed to execvp(notify-send): %s\n{}", std::strerror(errno));
     std::exit(EXEC_ERROR);  // Exits the forked process, not the main process
 }
 
