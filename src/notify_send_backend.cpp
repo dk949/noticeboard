@@ -11,6 +11,7 @@
 #include <cstring>
 #include <filesystem>
 #include <format>
+#include <iterator>
 #include <ranges>
 #include <stdexcept>
 #include <string>
@@ -82,6 +83,21 @@ static std::string_view trimWS(std::string_view str) {
         return std::isspace(ch);
     }).base(),
     };
+}
+
+template<typename R>
+static std::string joinRange(R const &range) {
+    auto begin = std::begin(range);
+    auto end = std::end(range);
+    if (begin == end) return "[]";
+    std::string out = "[";
+    std::format_to(std::back_inserter(out), "{}", *begin);
+    begin = std::next(begin);
+    for (auto it = begin; it != end; it = std::next(it)) {
+        std::format_to(std::back_inserter(out), ", {}", *it);
+    }
+    out.push_back(']');
+    return out;
 }
 
 static bool notifySendExists() {
@@ -158,7 +174,7 @@ static nb::SendResponse parseResponse(std::string_view sv, std::vector<nb::Actio
     if (taken == actions.end())
         throw nb::InternalNotifySendError(std::format("Taken action '{}' is not one of the expected actions {}",
             action,
-            actions | vws::transform([](nb::Action const &a) { return a.name + '=' + a.text; })));
+            joinRange(actions | vws::transform([](nb::Action const &a) { return a.name + '=' + a.text; }))));
     return {.id = nb::NoticeId(id), .action_taken = taken->name};
 }
 
