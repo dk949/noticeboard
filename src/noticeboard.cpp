@@ -502,10 +502,10 @@ NoticeId Notice::send(std::string_view header, std::string_view body, NoticeId r
             header,
             body,
             {
-                .pos = {-1, -1},
+                .pos = Pos::NoPos,
                 .replace = replace,
                 .blocking = false,
-    })
+            })
         .id;
 }
 
@@ -514,10 +514,10 @@ SendResponse Notice::sendSync(std::string_view header, std::string_view body, No
         header,
         body,
         {
-            .pos = {-1, -1},
+            .pos = Pos::NoPos,
             .replace = replace,
             .blocking = true,
-    });
+        });
 }
 
 NoticeId Notice::sendPos(Pos pos, std::string_view header, std::string_view body, NoticeId replace) const {

@@ -118,7 +118,10 @@ struct Pos {
     int x;
     int y;
     bool operator==(Pos const &) const = default;
+    static Pos const NoPos;
 };
+
+inline constexpr Pos Pos::NoPos = {-1, -1};
 
 enum struct NoticeId { NoReplace = -1 };
 

@@ -246,7 +246,7 @@ std::vector<std::string> NotifySendBackend::constructArgs(  //
         out.push_back(std::format("{}", std::to_underlying(opts.replace)));
     }
     if (opts.blocking) out.emplace_back("-w");
-    if (opts.pos != Pos {-1, -1}) {
+    if (opts.pos != Pos::NoPos) {
         addHint(Hint::custom("x", opts.pos.x));
         addHint(Hint::custom("y", opts.pos.y));
     }
