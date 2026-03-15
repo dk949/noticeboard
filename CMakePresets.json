@@ -19,6 +19,7 @@
       "description": "Preset for CI",
       "cacheVariables": {
         "CMAKE_EXPORT_COMPILE_COMMANDS": false,
+        "NOTICEBOARD_ENABLE_DBUS": false,
         "NOTICEBOARD_BUILD_TESTING": true
       }
     }
