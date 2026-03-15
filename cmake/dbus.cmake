@@ -1,0 +1,8 @@
+function(noticeboard_target_link_dbus target acc)
+    if(NOT NOTICEBOARD_ENABLE_DBUS)
+        return()
+    endif()
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(NOTICEBOARD_DBUS REQUIRED IMPORTED_TARGET GLOBAL dbus-1)
+    target_link_libraries(${target} ${acc} PkgConfig::NOTICEBOARD_DBUS)
+endfunction()
