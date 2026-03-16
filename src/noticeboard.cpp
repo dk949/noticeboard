@@ -122,15 +122,36 @@ static std::string_view catToString(nb::Category const &cat) {
     }, cat);
 }
 
+static nb::Backend determineBackend(nb::Backend backend) {
+    if (backend != nb::Backend::Default) return backend;
+#if defined(NOTICEBOARD_SYSTEM_LINUX)
+#    if defined(NOTICEBOARD_USE_DBUS)
+    return nb::Backend::DBUS;
+#    elif defined(NOTICEBOARD_USE_NOTIFY_SEND)
+    return nb::Backend::NotifySend;
+#    else
+#        error No supported backends selected for Linux
+#    endif
+#elif defined(NOTICEBOARD_SYSTEM_WINDOWS)
+    return nb::Backend::Win;
+#elif defined(NOTICEBOARD_SYSTEM_DARWIN)
+    return nb::Backend::Darwin;
+#else
+#    error Unsupported operating system
+#endif
+}
+
 static std::unique_ptr<nb::BackendBase> backendFactory(nb::Backend backend) {
     using enum nb::Backend;
-    switch (backend) {
-        case Default:
+    switch (determineBackend(backend)) {
         case NotifySend: return std::make_unique<nb::NotifySendBackend>();
         case Null: return std::make_unique<nb::NullBackend>();
+        case nb::Backend::Win:
+        case nb::Backend::Darwin:
         case DBUS: throw nb::NoticeError("DBUS backend not yet supported");
-        default: throw nb::NoticeError(std::format("Unsupported backend type {}", std::to_underlying(backend)));
+        case Default: break;
     }
+    throw nb::NoticeError(std::format("Unsupported backend type {}", std::to_underlying(backend)));
 }
 
 static std::string_view hintNameToString(nb::HintName const &hint_name) {

@@ -118,6 +118,8 @@ typedef enum NBBackend {
     NB_B_NotifySend,
     NB_B_Null,
     NB_B_DBUS,
+    NB_B_WIN,
+    NB_B_DARWIN,
 } NBBackend;
 
 NBNotice *NOTICEBOARD_NONNULL NBnewNotice(char const *NOTICEBOARD_NONNULL app_name, NBBackend backend);

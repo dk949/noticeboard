@@ -72,6 +72,8 @@ enum struct Backend {
     NotifySend = NBBackend::NB_B_NotifySend,
     Null = NBBackend::NB_B_Null,
     DBUS = NBBackend::NB_B_DBUS,
+    Win = NBBackend::NB_B_WIN,
+    Darwin = NBBackend::NB_B_DARWIN,
 };
 
 using Category = std::variant<StandardCategory, std::string>;
