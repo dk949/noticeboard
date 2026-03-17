@@ -191,6 +191,7 @@ struct Pos {
 inline constexpr Pos Pos::NoPos = {-1, -1};
 
 enum struct NoticeId { NoReplace = -1 };
+enum struct ExpireTime { Default = -1, None = 0 };
 
 struct SendResponse {
     NoticeId id;
@@ -199,7 +200,8 @@ struct SendResponse {
 
 [[deprecated("Use NoticeId::NoReplace instead")]]
 inline constexpr auto const NO_REPLACE = NoticeId::NoReplace;
-inline constexpr auto const DEFAULT_EXPIRE = 0;
+[[deprecated("Use ExpireTime::Default instead")]]
+inline constexpr auto const DEFAULT_EXPIRE = ExpireTime::Default;
 
 class BackendBase;
 }  // namespace nb
@@ -219,7 +221,7 @@ public:
     bool transient = false;
     std::string app_name;
     std::string icon;
-    int expire_time = nb::DEFAULT_EXPIRE;
+    nb::ExpireTime expire_time = nb::ExpireTime::Default;
 
     NBNotice();
     ~NBNotice();

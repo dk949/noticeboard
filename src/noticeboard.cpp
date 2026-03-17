@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <bit>
+#include <concepts>
 #include <cstdarg>
 #include <cstring>
 #include <format>
@@ -62,6 +63,17 @@ static NBUrgency as(nb::Urgency type) {
 [[nodiscard]]
 static nb::Backend as(NBBackend type) {
     return static_cast<nb::Backend>(type);
+}
+
+template<std::same_as<nb::ExpireTime> R>
+[[nodiscard]]
+static nb::ExpireTime as(int time) {
+    return static_cast<nb::ExpireTime>(time);
+}
+
+[[nodiscard]]
+static int as(nb::ExpireTime time) {
+    return static_cast<int>(time);
 }
 
 [[nodiscard]]
@@ -429,11 +441,11 @@ char const *NOTICEBOARD_NONNULL NBgetIcon(NBNotice const *NOTICEBOARD_NONNULL no
 }
 
 void NBsetExpireTime(NBNotice *NOTICEBOARD_NONNULL notice, int time) {
-    notice->expire_time = time;
+    notice->expire_time = as<nb::ExpireTime>(time);
 }
 
 int NBgetExpireTime(NBNotice const *NOTICEBOARD_NONNULL notice) {
-    return notice->expire_time;
+    return as(notice->expire_time);
 }
 
 int NBSend(NBNotice *NOTICEBOARD_NONNULL notice,  //

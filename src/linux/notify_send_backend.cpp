@@ -233,9 +233,9 @@ std::vector<std::string> NotifySendBackend::constructArgs(  //
     }
 
 
-    if (notice.expire_time != DEFAULT_EXPIRE) {
+    if (notice.expire_time != ExpireTime::Default) {
         out.emplace_back("-t");
-        out.push_back(std::format("{}", notice.expire_time));
+        out.push_back(std::format("{}", std::to_underlying(notice.expire_time)));
     }
 
     if (!notice.icon.empty()) {
