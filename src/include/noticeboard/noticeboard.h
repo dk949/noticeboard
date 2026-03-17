@@ -123,7 +123,6 @@ typedef enum NBBackend {
 } NBBackend;
 
 NBNotice *NOTICEBOARD_NONNULL NBnewNotice(char const *NOTICEBOARD_NONNULL app_name, NBBackend backend);
-NBNotice *NOTICEBOARD_NONNULL NBcopyNotice(NBNotice const *NOTICEBOARD_NONNULL notice);
 void NBdeleteNotice(NBNotice *NOTICEBOARD_NULLABLE);
 
 char const *NOTICEBOARD_NULLABLE NBerror(NBNotice const *NOTICEBOARD_NONNULL notice);

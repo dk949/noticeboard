@@ -15,7 +15,6 @@ public:
         std::string_view header,
         std::string_view body,
         BackendOptions opts) const override;
-    NotifySendBackend *clone() const override;
 private:
     std::vector<std::string> constructArgs(  //
         Notice const &notice,

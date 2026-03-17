@@ -285,7 +285,4 @@ SendResponse NotifySendBackend::send(  //
     return parseResponse(res, noticeActions(notice));
 }
 
-NotifySendBackend *NotifySendBackend::clone() const {
-    return new NotifySendBackend(*this);
-}
 }  // namespace nb

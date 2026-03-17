@@ -159,7 +159,7 @@ static std::unique_ptr<nb::BackendBase> backendFactory(nb::Backend backend) {
     switch (determineBackend(backend)) {
         case NotifySend: return std::make_unique<nb::NotifySendBackend>();
         case Null: return std::make_unique<nb::NullBackend>();
-        case DBUS: return std::make_unique<nb::DBusBackend>();
+        case DBUS: return std::make_unique<nb::DbusBackend>();
         case nb::Backend::Win:
         case nb::Backend::Darwin:
         case Default: break;
@@ -227,12 +227,6 @@ NBNotice *NOTICEBOARD_NONNULL NBnewNotice(char const *NOTICEBOARD_NONNULL app_na
         internalSetError(notice, std::format("Failed to create NBNotice: {}", e.what()));
         return notice;
     }
-}
-
-NBNotice *NOTICEBOARD_NONNULL NBcopyNotice(NBNotice const *NOTICEBOARD_NONNULL notice) {
-    return tryCatch(notice, "clone NBNotice", [&] {  //
-        return new nb::Notice(*as(notice));
-    });
 }
 
 void NBdeleteNotice(NBNotice *NOTICEBOARD_NULLABLE notice) {
@@ -501,25 +495,7 @@ int NBSendPosSync(NBNotice *NOTICEBOARD_NONNULL notice,
 NBNotice::NBNotice()
         : m_backend(nullptr) { }
 
-NBNotice ::NBNotice(NBNotice const &other) {
-    *this = other;
-}
-
 NBNotice::~NBNotice() = default;
-
-NBNotice &NBNotice ::operator=(NBNotice const &other) {
-    m_actions = other.m_actions;
-    m_hints = other.m_hints;
-    m_category = other.m_category;
-    m_error = other.m_error;
-    urgency = other.urgency;
-    transient = other.transient;
-    app_name = other.app_name;
-    icon = other.icon;
-    expire_time = other.expire_time;
-    m_backend.reset(other.m_backend->clone());
-    return *this;
-}
 
 namespace nb {
 Notice::Notice(std::string name, Backend backend)

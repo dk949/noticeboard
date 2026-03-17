@@ -17,7 +17,6 @@ public:
         std::string_view header,
         std::string_view body,
         BackendOptions opts) const override;
-    BackendBase *clone() const override;
 private:
     mutable int m_id = 0;
 };

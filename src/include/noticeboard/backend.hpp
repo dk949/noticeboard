@@ -23,7 +23,6 @@ public:
         std::string_view header,
         std::string_view body,
         BackendOptions opts) const = 0;
-    virtual BackendBase *clone() const = 0;
 protected:
 
     [[nodiscard]]

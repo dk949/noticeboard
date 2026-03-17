@@ -227,8 +227,8 @@ public:
     ~NBNotice();
     NBNotice(NBNotice &&) = default;
     NBNotice &operator=(NBNotice &&) = default;
-    NBNotice(NBNotice const &);
-    NBNotice &operator=(NBNotice const &);
+    NBNotice(NBNotice const &) = delete;
+    NBNotice &operator=(NBNotice const &) = delete;
 };
 
 namespace nb {

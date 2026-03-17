@@ -41,10 +41,6 @@ public:
 
         return {.id = m_id, .action_taken = std::nullopt};
     }
-
-    BackendBase *clone() const override {
-        return new TestBackend(*this);
-    }
 };
 
 #endif  // NOTICEBOARD_TESTS_TEST_BACKEND_HPP

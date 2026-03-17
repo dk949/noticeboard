@@ -19,8 +19,4 @@ SendResponse NotifySendBackend::send(  //
     error();
 }
 
-NotifySendBackend *NotifySendBackend::clone() const {
-    error();
-}
-
 }  // namespace nb
