@@ -3,10 +3,12 @@
 namespace nb {
 [[noreturn]]
 static void error() {
-    throw DBusError("libnoticeboard was not compiled with the dbus backend.");
+    throw DbusError("libnoticeboard was not compiled with the dbus backend.");
 }
 
-SendResponse DBusBackend::send(  //
+struct DbusBackend::Impl { };
+
+SendResponse DbusBackend::send(  //
     Notice const &notice,
     std::string_view header,
     std::string_view body,
@@ -14,7 +16,11 @@ SendResponse DBusBackend::send(  //
     error();
 }
 
-DBusBackend::DBusBackend() {
+DbusBackend::DbusBackend()
+        : m_impl(nullptr) {
     error();
 }
+
+DbusBackend::~DbusBackend() = default;
+
 }  // namespace nb

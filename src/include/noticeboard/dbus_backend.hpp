@@ -2,15 +2,18 @@
 #define NOTICEBOARD_DBUS_BACKEND_HPP
 
 #include "noticeboard/backend.hpp"
+#include <memory>
 
 namespace nb {
-class DBusError : public BackendError {
+class DbusError : public BackendError {
     using BackendError::BackendError;
 };
 
-class DBusBackend : public BackendBase {
+class DbusBackend : public BackendBase {
+    struct Impl;
+    std::unique_ptr<Impl> m_impl;
 public:
-    DBusBackend();
+    DbusBackend();
 
     SendResponse send(  //
         Notice const &notice,
@@ -18,7 +21,7 @@ public:
         std::string_view body,
         BackendOptions opts) const override;
 
-    DBusBackend *clone() const override;
+    ~DbusBackend() override;
 };
 
 }  // namespace nb
