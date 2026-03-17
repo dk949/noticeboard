@@ -530,10 +530,6 @@ SendResponse Notice::sendSync(std::string_view header, std::string_view body, No
         });
 }
 
-NoticeId Notice::sendPos(Pos pos, std::string_view header, std::string_view body, NoticeId replace) const {
-    return send(pos, header, body, replace);
-}
-
 NoticeId Notice::send(Pos pos, std::string_view header, std::string_view body, NoticeId replace) const {
     return m_backend
         ->send(*this,
@@ -545,10 +541,6 @@ NoticeId Notice::send(Pos pos, std::string_view header, std::string_view body, N
                 .blocking = false,
             })
         .id;
-}
-
-SendResponse Notice::sendPosSync(Pos pos, std::string_view header, std::string_view body, NoticeId replace) const {
-    return sendSync(pos, header, body, replace);
 }
 
 SendResponse Notice::sendSync(Pos pos, std::string_view header, std::string_view body, NoticeId replace) const {
