@@ -170,7 +170,7 @@ static nb::SendResponse parseResponse(std::string_view sv, std::vector<nb::Actio
     if (actions.empty())
         throw nb::InternalNotifySendError(std::format("notify-send produced unexpected output: {}", sv));
     auto action = trimWS(ptr);
-    auto taken = rng::find(actions, action, [](auto const &a) { return std::string_view {a.name}; });
+    auto taken = rng::find(actions, action, [](auto const &a) noexcept { return std::string_view {a.name}; });
     if (taken == actions.end())
         throw nb::InternalNotifySendError(std::format("Taken action '{}' is not one of the expected actions {}",
             action,

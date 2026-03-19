@@ -78,7 +78,7 @@ static int as(nb::ExpireTime time) {
 
 [[nodiscard]]
 static void const *hintValueToVoidP(nb::HintValue const &value) noexcept {
-    return std::visit([]<typename T>(T const &v) {
+    return std::visit([]<typename T>(T const &v) noexcept {
         using D = std::remove_cvref_t<T>;
         if constexpr (std::is_same_v<bool, D> || std::is_same_v<std::uint8_t, D>)
             return std::bit_cast<void const *>(static_cast<std::uint64_t>(v));
@@ -92,14 +92,13 @@ static auto findHintByName(std::vector<nb::Hint> const &hints, std::string_view 
     return std::find_if(hints.begin(), hints.end(), [&](auto const &hint) { return hint.name() == hint_name; });
 }
 
-static std::string_view catToString(nb::Category const &cat) {
-    return std::visit([]<typename T>(T const &c) {
+static std::string_view catToString(nb::Category const &cat) noexcept {
+    return std::visit([]<typename T>(T const &c) noexcept {
         using D = std::remove_cvref_t<T>;
         if constexpr (std::is_same_v<nb::StandardCategory, D>) {
             using namespace std::string_view_literals;
             using enum nb::StandardCategory;
             switch (c) {
-                case None: return ""sv;
                 case Call: return "call"sv;
                 case CallEnded: return "call.ended"sv;
                 case CallIncoming: return "call.incoming"sv;
@@ -124,9 +123,8 @@ static std::string_view catToString(nb::Category const &cat) {
                 case Transfer: return "transfer"sv;
                 case TransferComplete: return "transfer.complete"sv;
                 case TransferError: return "transfer.error"sv;
-                default:
-                    throw nb::InternalNoticeError(
-                        std::format("Unknown standard categoty in variant: {}", std::to_underlying(c)));
+                case None:
+                default: return ""sv;
             }
         }
         if constexpr (std::is_same_v<std::string, D>) {
@@ -167,10 +165,11 @@ static std::unique_ptr<nb::BackendBase> backendFactory(nb::Backend backend) {
     throw nb::NoticeError(std::format("Unsupported backend type {}", std::to_underlying(backend)));
 }
 
-static std::string_view hintNameToString(nb::HintName const &hint_name) {
-    return std::visit([]<typename T>(T const &h) {
-        using D = std::remove_cvref_t<T>;
-        if constexpr (std::is_same_v<nb::StandardHint, D>) {
+static std::string_view hintNameToString(nb::HintName const &hint_name) noexcept {
+    return std::visit(
+        []<typename T, typename D = std::remove_cvref_t<T>, bool is_standard_hint = std::is_same_v<nb::StandardHint, D>>(
+            T const &h) noexcept {
+        if constexpr (is_standard_hint) {
             using namespace std::string_view_literals;
             using enum nb::StandardHint;
             switch (h) {
@@ -181,15 +180,13 @@ static std::string_view hintNameToString(nb::HintName const &hint_name) {
                 case SoundFile: return "sound_file"sv;
                 case SoundName: return "sound-name"sv;
                 case SuppressSound: return "suppress-sound"sv;
-                default:
-                    throw nb::InternalNoticeError(
-                        std::format("Unknown standard hint in variant: {}", std::to_underlying(h)));
+                default: return ""sv;
             }
-        }
-        if constexpr (std::is_same_v<std::string, D>) {
+        } else {
             return std::string_view {h};
         }
-    }, hint_name);
+    },
+        hint_name);
 }
 
 void internalSetError(NBNotice const *notice, std::string error) noexcept {
@@ -297,6 +294,7 @@ void NBpushCustomHint(NBNotice *NOTICEBOARD_NONNULL notice, NBHintType type, cha
     return tryCatch(notice, "push custom hint", [&] {
         switch (type) {
             case NB_HT_BOOLEAN: as(notice)->pushHint(nb::Hint::custom(name, va_arg(args, int) != 0)); break;
+            case NB_HT_BYTE: as(notice)->pushHint(nb::Hint::custom(name, std::uint8_t(va_arg(args, unsigned)))); break;
             case NB_HT_INT: as(notice)->pushHint(nb::Hint::custom(name, va_arg(args, int))); break;
             case NB_HT_DOUBLE: as(notice)->pushHint(nb::Hint::custom(name, va_arg(args, double))); break;
             case NB_HT_STRING:
@@ -680,7 +678,8 @@ Hint Hint::suppressSound(bool value) {
 }
 
 Hint Hint::custom(std::string name, HintValue value) noexcept {
-    auto type = std::visit([]<typename T>(T const &) { return Hint::type_to_enum_v<std::remove_cvref_t<T>>; }, value);
+    auto type =
+        std::visit([]<typename T>(T const &) noexcept { return Hint::type_to_enum_v<std::remove_cvref_t<T>>; }, value);
     return {type, std::move(name), std::move(value)};
 }
 
