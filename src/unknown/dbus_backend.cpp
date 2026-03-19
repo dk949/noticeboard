@@ -9,10 +9,10 @@ static void error() {
 struct DbusBackend::Impl { };
 
 SendResponse DbusBackend::send(  //
-    Notice const &notice,
-    std::string_view header,
-    std::string_view body,
-    BackendOptions opts) const {
+    Notice const &,
+    std::string_view,
+    std::string_view,
+    BackendOptions) const {
     error();
 }
 
